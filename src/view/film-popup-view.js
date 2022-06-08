@@ -9,7 +9,7 @@ const createFilmPopupTemplate = (film) => {
   const actors = film.filmInfo.actors.join(', ');
   const country = film.filmInfo.release.releaseCountry;
   const [...genres] = genre.map((genreItem) => `<span class="film-details__genre">${genreItem}</span>`);
-  //const comments = movie.comments;
+  //const comments = film.comments;
   const releaseDate = dayjs(film.filmInfo.release.date).format('D MMMM YYYY');
   const duration = getDuration(film.filmInfo.runtime);
 
@@ -186,23 +186,26 @@ const createFilmPopupTemplate = (film) => {
 };
 
 export default class FilmPopupView {
+  #film = null;
+  #element = null;
+
   constructor (film) {
-    this.film = film;
+    this.#film = film;
   }
 
-  getTemplate() {
-    return createFilmPopupTemplate(this.film);
+  get template() {
+    return createFilmPopupTemplate(this.#film);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
