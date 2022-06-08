@@ -1,8 +1,9 @@
 import { createElement } from '../render';
+import { NoFilms, TitleMessage } from '../utils/film';
 
-const createFilmsListTemplate = () => (`<section class="films">
+const createFilmsListTemplate = (isEmptyList, titleMessage) => (`<section class="films">
     <section class="films-list">
-      <h2 class="films-list__title visually-hidden">All movies. Upcoming</h2>
+      <h2 class="films-list__title ${isEmptyList ? '' : 'visually-hidden'}">${titleMessage}</h2>
     </section>
 
     <!-- extra 'Top rated' -->
@@ -13,9 +14,16 @@ const createFilmsListTemplate = () => (`<section class="films">
 
 export default class FilmsListView {
   #element = null;
+  #isEmptyList = null;
+  #titleMessage = null;
+
+  constructor(isEmptyList = NoFilms.FALSE, message = TitleMessage.DEFAULT) {
+    this.#isEmptyList = isEmptyList;
+    this.#titleMessage = message;
+  }
 
   get template() {
-    return createFilmsListTemplate();
+    return createFilmsListTemplate(this.#isEmptyList, this.#titleMessage);
   }
 
   get element() {
