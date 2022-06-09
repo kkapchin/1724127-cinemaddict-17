@@ -1,9 +1,4 @@
-export const getRandomInteger = (a, b) => {
-  const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
-  const upper = Math.floor(Math.max(Math.abs(a), Math.abs(b)));
-  const result = Math.random() * (upper - lower + 1) + lower;
-  return Math.floor(result);
-};
+import { getRandomInteger } from '../utils/common';
 
 const getDescription = () => {
   const quantity = getRandomInteger(1, 5);
