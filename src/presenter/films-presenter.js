@@ -1,17 +1,23 @@
-import { render, RenderPosition } from '../render';
+import { render } from '../render';
+import { FilterType, NoFilms, TitleMessage } from '../utils/film';
 import FilmCardView from '../view/film-card-view';
 import FilmPopupView from '../view/film-popup-view';
 import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 
+const FILMS_COUNT_PER_STEP = 5;
+
 export default class FilmsPresenter {
-  #filmsListComponent = new FilmsListView();
   #showMoreButtonComponent = new ShowMoreButtonView();
   #filmsContainerComponent = new FilmsContainerView();
+  #filmsListComponent = null;
   #mainContainer = null;
   #filmsModel = null;
   #prevPopup = null;
+  #films = [];
+  #renderedFilmsCount = FILMS_COUNT_PER_STEP;
+  #currentFilter = FilterType.ALL;
 
   constructor(mainContainer) {
     this.#mainContainer = mainContainer;
@@ -19,15 +25,37 @@ export default class FilmsPresenter {
 
   init = (filmsModel) => {
     this.#filmsModel = filmsModel;
+    this.#films = [...this.#filmsModel.films];
 
-    render(this.#filmsListComponent, this.#mainContainer);
 
-    for (const film of this.#filmsModel.films) {
-      this.#renderFilm(film);
+    this.#renderFilms();
+  };
+
+  #renderFilms = () => {
+    if (this.#films.length === 0) {
+      this.#renderNoFilms();
+    } else {
+
+      if(this.#filmsListComponent) {
+        this.#filmsListComponent.element.remove();
+        this.#filmsListComponent.removeElement();
+      }
+
+      this.#filmsListComponent = new FilmsListView();
+      render(this.#filmsListComponent, this.#mainContainer);
+
+      for (let i = 0; i < Math.min(this.#films.length, FILMS_COUNT_PER_STEP); i++) {
+        this.#renderFilm(this.#films[i]);
+      }
+
+      render(this.#filmsContainerComponent, this.#filmsListComponent.element.lastElementChild);
+
+      if (this.#films.length > FILMS_COUNT_PER_STEP) {
+
+        this.#showMoreButtonComponent.element.addEventListener('click', this.#handleShowMoreButtonClick);
+        render(this.#showMoreButtonComponent, this.#filmsListComponent.element.lastElementChild);
+      }
     }
-
-    render(this.#filmsContainerComponent, this.#filmsListComponent.element.lastElementChild);
-    render(this.#showMoreButtonComponent, this.#filmsListComponent.element.lastElementChild);
   };
 
   #renderFilm = (film) => {
@@ -37,7 +65,7 @@ export default class FilmsPresenter {
       this.#renderPopup(film);
     });
 
-    render(filmCardComponent, this.#filmsContainerComponent.element, RenderPosition.AFTERBEGIN);
+    render(filmCardComponent, this.#filmsContainerComponent.element);
   };
 
   #renderPopup = (film) => {
@@ -47,10 +75,10 @@ export default class FilmsPresenter {
 
     const filmPopupComponent = new FilmPopupView(film);
 
-    document.addEventListener('keydown', this.#onEscKeyDown);
+    document.addEventListener('keydown', this.#handleEscapeKeydown);
 
     filmPopupComponent.element.querySelector('.film-details__close-btn').addEventListener('click', () => {
-      document.removeEventListener('keydown', this.#onEscKeyDown);
+      document.removeEventListener('keydown', this.#handleEscapeKeydown);
       this.#closePopup(filmPopupComponent);
     });
 
@@ -65,11 +93,36 @@ export default class FilmsPresenter {
     this.#prevPopup = null;
   };
 
-  #onEscKeyDown = (evt) => {
+  #handleEscapeKeydown = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.#closePopup();
-      document.removeEventListener('keydown', this.#onEscKeyDown);
+      document.removeEventListener('keydown', this.#handleEscapeKeydown);
+    }
+  };
+
+  #renderNoFilms = () => {
+    if(this.#filmsListComponent) {
+      this.#filmsListComponent.element.remove();
+      this.#filmsListComponent.removeElement();
+    }
+    const titleMessageKey = this.#currentFilter;
+    this.#filmsListComponent = new FilmsListView(NoFilms.TRUE, TitleMessage[titleMessageKey]);
+    render(this.#filmsListComponent, this.#mainContainer);
+  };
+
+  #handleShowMoreButtonClick = (evt) => {
+    evt.preventDefault();
+    this.#films
+      .slice(this.#renderedFilmsCount, this.#renderedFilmsCount + FILMS_COUNT_PER_STEP)
+      .forEach((film) => this.#renderFilm(film));
+
+    this.#renderedFilmsCount += FILMS_COUNT_PER_STEP;
+
+    if (this.#renderedFilmsCount >= this.#films.length) {
+      this.#renderedFilmsCount = FILMS_COUNT_PER_STEP;
+      this.#showMoreButtonComponent.element.remove();
+      this.#showMoreButtonComponent.removeElement();
     }
   };
 }

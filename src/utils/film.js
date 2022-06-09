@@ -12,3 +12,23 @@ export const getDuration = (minutes) => {
 
   return `${duration.format('mm')}m`;
 };
+
+export const TitleMessage = {
+  ALL: 'There are no movies in our database',
+  WATCHLIST: 'There are no movies to watch now',
+  HISTORY: 'There are no watched movies now',
+  FAVORITES: 'There are no favorite movies now',
+  DEFAULT: 'All movies. Upcoming',
+};
+
+export const FilterType = {
+  ALL: 'ALL',
+  WATCHLIST: 'WATCHLIST',
+  HISTORY: 'HISTORY',
+  FAVORITES: 'FAVORITES',
+};
+
+export const NoFilms = {
+  TRUE: true,
+  FALSE: false,
+};
