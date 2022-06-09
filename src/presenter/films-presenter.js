@@ -5,10 +5,12 @@ import FilmPopupView from '../view/film-popup-view';
 import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
+import NavigationPresenter from './navigation-presenter';
 
 const FILMS_COUNT_PER_STEP = 5;
 
 export default class FilmsPresenter {
+  #navigationPresenter = null;
   #showMoreButtonComponent = new ShowMoreButtonView();
   #filmsContainerComponent = new FilmsContainerView();
   #filmsListComponent = null;
@@ -26,8 +28,9 @@ export default class FilmsPresenter {
   init = (filmsModel) => {
     this.#filmsModel = filmsModel;
     this.#films = [...this.#filmsModel.films];
+    this.#navigationPresenter = new NavigationPresenter(this.#mainContainer);
 
-
+    this.#navigationPresenter.init(this.#films, this.#currentFilter);
     this.#renderFilms();
   };
 
