@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
-import { createElement } from '../render';
-import { getDuration } from '../utils/film';
+import AbstractView from '../framework/view/abstract-view';
+import { getDuration } from '../utils/common';
 
 const createFilmPopupTemplate = (film) => {
   const { title, totalRating, genre, description, poster, ageRating, director } = film.filmInfo;
@@ -185,11 +185,11 @@ const createFilmPopupTemplate = (film) => {
     </section>`);
 };
 
-export default class FilmPopupView {
+export default class FilmPopupView extends AbstractView {
   #film = null;
-  #element = null;
 
   constructor (film) {
+    super();
     this.#film = film;
   }
 
@@ -197,15 +197,12 @@ export default class FilmPopupView {
     return createFilmPopupTemplate(this.#film);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setCloseButtonClickHandler = (callback) => {
+    this._callback.closeButtonClick = callback;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
+  };
 
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
+  #closeButtonClickHandler = () => {
+    this._callback.closeButtonClick();
+  };
 }
