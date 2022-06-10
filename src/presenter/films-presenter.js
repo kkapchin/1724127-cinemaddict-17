@@ -1,16 +1,19 @@
 import { render } from '../render';
 import { FilterType, NoFilms, TitleMessage } from '../utils/common';
+import { SortType } from '../utils/sort';
 import FilmCardView from '../view/film-card-view';
 import FilmPopupView from '../view/film-popup-view';
 import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import ShowMoreButtonView from '../view/show-more-button-view';
 import NavigationPresenter from './navigation-presenter';
+import SortPresenter from './sort-presenter';
 
 const FILMS_COUNT_PER_STEP = 5;
 
 export default class FilmsPresenter {
   #navigationPresenter = null;
+  #sortPresenter = null;
   #showMoreButtonComponent = new ShowMoreButtonView();
   #filmsContainerComponent = new FilmsContainerView();
   #filmsListComponent = null;
@@ -20,6 +23,7 @@ export default class FilmsPresenter {
   #films = [];
   #renderedFilmsCount = FILMS_COUNT_PER_STEP;
   #currentFilter = FilterType.ALL;
+  #currentSort = SortType.DEFAULT;
 
   constructor(mainContainer) {
     this.#mainContainer = mainContainer;
@@ -29,8 +33,10 @@ export default class FilmsPresenter {
     this.#filmsModel = filmsModel;
     this.#films = [...this.#filmsModel.films];
     this.#navigationPresenter = new NavigationPresenter(this.#mainContainer);
+    this.#sortPresenter = new SortPresenter(this.#mainContainer);
 
     this.#navigationPresenter.init(this.#films, this.#currentFilter);
+    this.#sortPresenter.init(this.#currentSort);
     this.#renderFilms();
   };
 
