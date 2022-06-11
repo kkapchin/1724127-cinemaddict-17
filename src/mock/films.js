@@ -1,4 +1,5 @@
 import { getRandomInteger } from '../utils/common';
+import { nanoid } from 'nanoid';
 
 const getDescription = () => {
   const quantity = getRandomInteger(1, 5);
@@ -123,7 +124,7 @@ const getFilmInfo = () => {
 };
 
 export const getFilm = () => ({
-  id: '0',
+  id: nanoid(),
   comments: [
     '42', '43'
   ],
