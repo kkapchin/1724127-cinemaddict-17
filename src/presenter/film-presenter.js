@@ -9,16 +9,26 @@ export default class FilmPresenter {
   #mainContainer = null;
   #film = null;
   #resetFilmsList = null;
+  #changeData = null;
 
-  constructor(container, mainContainer, resetFilmsList) {
+  constructor(container, mainContainer, resetFilmsList, changeData) {
     this.#filmContainer = container;
     this.#mainContainer = mainContainer;
     this.#resetFilmsList = resetFilmsList;
+    this.#changeData = changeData;
   }
 
   init(film) {
     this.#film = film;
     this.#renderFilm();
+  }
+
+  update(updatedFilm) {
+    if(this.#filmPopupComponent) {
+      this.#filmPopupComponent.updateElement(updatedFilm);
+    }
+    this.#film = updatedFilm;
+    this.#filmCardComponent.updateElement(updatedFilm);
   }
 
   resetView = () => {
@@ -31,6 +41,15 @@ export default class FilmPresenter {
     this.#filmCardComponent.setFilmCardClickHandler(() => {
       this.#renderPopup();
     });
+    this.#filmCardComponent.setAddToWatchlistClickHandler(() => {
+      this.#handleAddToWatchlistClick();
+    });
+    this.#filmCardComponent.setMarkAsWatchedClickHandler(() => {
+      this.#handleMarkAsWatchedClick();
+    });
+    this.#filmCardComponent.setMarkAsFavoriteClickHandler(() => {
+      this.#handleMarkAsFavoriteClick();
+    });
 
     render(this.#filmCardComponent, this.#filmContainer.element);
   };
@@ -38,7 +57,6 @@ export default class FilmPresenter {
   #renderPopup = () => {
 
     this.#resetFilmsList();
-
     this.#filmPopupComponent = new FilmPopupView(this.#film);
 
     document.addEventListener('keydown', this.#handleEscapeKeydown);
@@ -46,16 +64,19 @@ export default class FilmPresenter {
     this.#filmPopupComponent.setCloseButtonClickHandler(() => {
       this.#closePopup();
     });
+    this.#filmPopupComponent.setAddToWatchlistClickHandler(() => {
+      this.#handleAddToWatchlistClick();
+    });
+    this.#filmPopupComponent.setMarkAsWatchedClickHandler(() => {
+      this.#handleMarkAsWatchedClick();
+    });
+    this.#filmPopupComponent.setMarkAsFavoriteClickHandler(() => {
+      this.#handleMarkAsFavoriteClick();
+    });
+
 
     this.#mainContainer.parentElement.classList.add('hide-overflow');
     this.#mainContainer.parentElement.appendChild(this.#filmPopupComponent.element);
-  };
-
-  #handleEscapeKeydown = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this.#closePopup();
-    }
   };
 
   #closePopup = () => {
@@ -66,5 +87,33 @@ export default class FilmPresenter {
     this.#mainContainer.parentElement.classList.remove('hide-overflow');
     this.#mainContainer.parentElement.removeChild(this.#filmPopupComponent.element);
     this.#filmPopupComponent = null;
+  };
+
+  #handleEscapeKeydown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.#closePopup();
+    }
+  };
+
+  #handleAddToWatchlistClick = () => {
+    this.#changeData({
+      ...this.#film,
+      userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}
+    });
+  };
+
+  #handleMarkAsWatchedClick = () => {
+    this.#changeData({
+      ...this.#film,
+      userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}
+    });
+  };
+
+  #handleMarkAsFavoriteClick = () => {
+    this.#changeData({
+      ...this.#film,
+      userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}
+    });
   };
 }
