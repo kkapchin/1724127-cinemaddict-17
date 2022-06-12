@@ -78,6 +78,9 @@ export default class FilmPresenter {
     this.#filmPopupComponent.setMarkAsFavoriteClickHandler(() => {
       this.#handleMarkAsFavoriteClick();
     });
+    this.#filmPopupComponent.setEmojiClickHandler((emoji) => {
+      this.#handleEmojiClick(emoji);
+    });
 
 
     this.#mainContainer.parentElement.classList.add('hide-overflow');
@@ -119,6 +122,13 @@ export default class FilmPresenter {
     this.#changeData({
       ...this.#film,
       userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}
+    });
+  };
+
+  #handleEmojiClick = (emoji) => {
+    this.#changeData({
+      ...this.#film,
+      userComment: {...this.#film.userComment, emotion: emoji}
     });
   };
 }
