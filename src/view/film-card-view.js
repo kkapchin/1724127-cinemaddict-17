@@ -35,7 +35,7 @@ const createFilmCardTemplate = (film) => {
 export default class FilmCardView extends AbstractStatefulView {
   constructor(film) {
     super();
-    this._state = film;
+    this._setState(film);
   }
 
   get template() {

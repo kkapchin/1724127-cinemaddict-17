@@ -1,4 +1,4 @@
-import { render } from '../framework/render';
+import { remove, render } from '../framework/render';
 import FilmCardView from '../view/film-card-view';
 import FilmPopupView from '../view/film-popup-view';
 
@@ -33,6 +33,11 @@ export default class FilmPresenter {
 
   resetView = () => {
     this.#closePopup();
+  };
+
+  destroy = () => {
+    remove(this.#filmCardComponent);
+    remove(this.#filmPopupComponent);
   };
 
   #renderFilm = () => {
