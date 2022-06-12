@@ -110,7 +110,7 @@ const getFilmInfo = () => {
       'Freegan Morman',
     ],
     release: {
-      date: '2019-05-11T00:00:00.000Z',
+      date: `20${getRandomInteger(10, 99)}-05-11T00:00:00.000Z`,
       releaseCountry: 'USA'
     },
     runtime: getRandomInteger(120, 180),

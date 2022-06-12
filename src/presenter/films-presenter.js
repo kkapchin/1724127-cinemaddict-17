@@ -1,7 +1,7 @@
 import { remove } from '../framework/render';
 import { render } from '../render';
 import { FilterType, NoFilms, TitleMessage, updateItem } from '../utils/common';
-import { SortType } from '../utils/sort';
+import { sortByDate, sortByRating, SortType } from '../utils/sort';
 import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import FilmPresenter from './film-presenter';
@@ -24,7 +24,7 @@ export default class FilmsPresenter {
   #sourcedFilms = [];
   #renderedFilmsCount = null;
   #currentFilter = FilterType.ALL;
-  #currentSort = SortType.DEFAULT;
+  #currentSortType = SortType.DEFAULT;
 
   constructor(mainContainer) {
     this.#mainContainer = mainContainer;
@@ -35,10 +35,10 @@ export default class FilmsPresenter {
     this.#films = [...this.#filmsModel.films];
     this.#sourcedFilms = [...this.#filmsModel.films];
     this.#navigationPresenter = new NavigationPresenter(this.#mainContainer);
-    this.#sortPresenter = new SortPresenter(this.#mainContainer);
+    this.#sortPresenter = new SortPresenter(this.#mainContainer, this.#handleSortTypeChange);
 
     this.#navigationPresenter.init(this.#films, this.#currentFilter);
-    this.#sortPresenter.init(this.#currentSort);
+    this.#sortPresenter.init(this.#currentSortType);
 
     this.#renderFilmsList();
   };
@@ -87,6 +87,14 @@ export default class FilmsPresenter {
     this.#filmPresenter.forEach((presenter) => presenter.resetView());
   };
 
+  #clearFilmsList = () => {
+    remove(this.#filmsListComponent);
+    this.#filmPresenter.forEach((presenter) => presenter.destroy());
+    this.#filmPresenter.clear();
+    this.#renderedFilmsCount = null;
+    this.#showMoreButtonPresenter.remove();
+  };
+
   #renderNoFilms = () => {
     if(this.#filmsListComponent) {
       remove(this.#filmsListComponent);
@@ -109,5 +117,29 @@ export default class FilmsPresenter {
     this.#films = updateItem(this.#films, updatedFilm);
     this.#sourcedFilms = updateItem(this.#sourcedFilms, updatedFilm);
     this.#filmPresenter.get(updatedFilm.id).update(updatedFilm);
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+    this.#currentSortType = sortType;
+    this.#sortFilms(sortType);
+    this.#sortPresenter.update(sortType);
+    this.#clearFilmsList();
+    this.#renderFilmsList();
+  };
+
+  #sortFilms = (sortType) => {
+    switch (sortType) {
+      case SortType.DATE:
+        this.#films.sort(sortByDate);
+        break;
+      case SortType.RATING:
+        this.#films.sort(sortByRating);
+        break;
+      default:
+        this.#films = [...this.#sourcedFilms];
+    }
   };
 }
