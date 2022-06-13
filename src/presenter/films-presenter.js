@@ -1,7 +1,7 @@
 import { remove } from '../framework/render';
 import { render } from '../render';
 import { FilterType, NoFilms, TitleMessage, updateItem } from '../utils/common';
-import { sortByDate, sortByRating, SortType } from '../utils/sort';
+import { sortFilmsByDate, sortFilmsByRating, SortType } from '../utils/sort';
 import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import FilmPresenter from './film-presenter';
@@ -133,10 +133,10 @@ export default class FilmsPresenter {
   #sortFilms = (sortType) => {
     switch (sortType) {
       case SortType.DATE:
-        this.#films.sort(sortByDate);
+        this.#films.sort(sortFilmsByDate);
         break;
       case SortType.RATING:
-        this.#films.sort(sortByRating);
+        this.#films.sort(sortFilmsByRating);
         break;
       default:
         this.#films = [...this.#sourcedFilms];

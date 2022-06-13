@@ -1,5 +1,6 @@
 import { getRandomInteger } from '../utils/common';
 import { nanoid } from 'nanoid';
+import { getComment } from './comment';
 
 const getDescription = () => {
   const quantity = getRandomInteger(1, 5);
@@ -125,9 +126,7 @@ const getFilmInfo = () => {
 
 export const getFilm = () => ({
   id: nanoid(),
-  comments: [
-    '42', '43'
-  ],
+  comments: new Array(getRandomInteger(3, 5)).fill().map(() => getComment()),
   filmInfo: getFilmInfo(),
   userDetails: {
     watchlist: false,

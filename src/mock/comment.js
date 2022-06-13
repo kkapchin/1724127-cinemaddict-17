@@ -1,4 +1,4 @@
-import { getRandomInteger } from './movies';
+import { getRandomInteger } from '../utils/common';
 
 const authors = [
   'Goblin Puchkov',
@@ -35,7 +35,7 @@ export const getComment = (id) => {
     id: id,
     author: authors[index],
     comment: comments[index],
-    date: '2022-02-02T21:59:32.554Z',
+    date: `20${getRandomInteger(10, 99)}-02-02T21:59:32.554Z`,
     emotion: emotions[index],
   };
 };

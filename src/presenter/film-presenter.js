@@ -1,13 +1,17 @@
 import { remove, render } from '../framework/render';
+import { sortCommentsByDate } from '../utils/sort';
 import FilmCardView from '../view/film-card-view';
+import FilmCommentView from '../view/film-comment-view';
 import FilmPopupView from '../view/film-popup-view';
 
 export default class FilmPresenter {
   #filmPopupComponent = null;
   #filmCardComponent = null;
+  #filmCommentComponent = null;
   #filmContainer = null;
   #mainContainer = null;
   #film = null;
+  #comments = null;
   #resetFilmsList = null;
   #changeData = null;
 
@@ -29,6 +33,7 @@ export default class FilmPresenter {
     }
     this.#film = updatedFilm;
     this.#filmCardComponent.updateElement(updatedFilm);
+    this.#renderComments();
   }
 
   resetView = () => {
@@ -82,6 +87,7 @@ export default class FilmPresenter {
       this.#handleEmojiClick(emoji);
     });
 
+    this.#renderComments();
 
     this.#mainContainer.parentElement.classList.add('hide-overflow');
     this.#mainContainer.parentElement.appendChild(this.#filmPopupComponent.element);
@@ -95,6 +101,15 @@ export default class FilmPresenter {
     this.#mainContainer.parentElement.classList.remove('hide-overflow');
     this.#mainContainer.parentElement.removeChild(this.#filmPopupComponent.element);
     this.#filmPopupComponent = null;
+  };
+
+  #renderComments = () => {
+    this.#comments = this.#film.comments.sort(sortCommentsByDate);
+    this.#comments.map((comment) => {
+      const filmCommentComponent = new FilmCommentView(comment);
+      filmCommentComponent.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
+      render(filmCommentComponent, this.#filmPopupComponent.element.querySelector('.film-details__comments-list'));
+    });
   };
 
   #handleEscapeKeydown = (evt) => {
@@ -130,5 +145,9 @@ export default class FilmPresenter {
       ...this.#film,
       userComment: {...this.#film.userComment, emotion: emoji}
     });
+  };
+
+  #handleDeleteCommentClick = () => {
+
   };
 }
