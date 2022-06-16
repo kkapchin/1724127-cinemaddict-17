@@ -66,3 +66,15 @@ export const CommentEmotion = {
   PUKE: 'puke',
   ANGRY: 'angry',
 };
+
+export const UpdateType = {
+  FILM: 'FILM',
+  COMMENT: 'COMMENT'
+};
+
+export const UserAction = {
+  UPDATE_FILM: 'UPDATE_FILM',
+  UPDATE_USER_COMMENT: 'UPDATE_USER_COMMENT',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
+};

@@ -8,8 +8,8 @@ const header = document.querySelector('.header');
 const main = document.querySelector('.main');
 const footer = document.querySelector('.footer__statistics');
 
-const filmsPresenter = new FilmsPresenter(main);
 const filmsModel = new FilmsModel();
+const filmsPresenter = new FilmsPresenter(main, filmsModel);
 
 render(new UserProfileView(), header);
 render(new FooterStatsView(), footer);
