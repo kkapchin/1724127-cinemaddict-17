@@ -74,7 +74,7 @@ export default class FilmCardView extends AbstractStatefulView {
 
   #filmCardClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.filmCardClick();
+    this._callback.filmCardClick(this._state);
   };
 
   #addToWatchlistClickHandler = (evt) => {

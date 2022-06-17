@@ -1,10 +1,11 @@
-import { render } from '../framework/render';
+import { remove, render } from '../framework/render';
+import { UpdateType, UserAction } from '../utils/common';
 import { SortType } from '../utils/sort';
 import SortView from '../view/sort-view';
 
 export default class SortPresenter {
   #mainContainer = null;
-  #currentSort = null;
+  #sortType = null;
   #sortComponent = null;
   #changeSort = null;
 
@@ -13,23 +14,30 @@ export default class SortPresenter {
     this.#changeSort = changeSort;
   }
 
-  init = (currentSort = SortType.DEFAULT) => {
-    this.#currentSort = currentSort;
+  init = (sortType = SortType.DEFAULT) => {
+    this.#sortType = sortType;
     this.#renderSort();
   };
 
   update(sortType) {
-    this.#currentSort = sortType;
+    this.#sortType = sortType;
     this.#sortComponent.updateElement({sortType});
   }
 
+  destroy = () => {
+    remove(this.#sortComponent);
+  };
+
   #renderSort = () => {
-    this.#sortComponent = new SortView(this.#currentSort);
-    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortClick);
+    this.#sortComponent = new SortView(this.#sortType);
+    this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
     render(this.#sortComponent, this.#mainContainer);
   };
 
-  #handleSortClick = (sortType) => {
-    this.#changeSort(sortType);
+  #handleSortTypeChange = (sortType) => {
+    if(this.#sortType === sortType) {
+      return;
+    }
+    this.#changeSort(UserAction.CHANGE_SORT, UpdateType.MID, sortType);
   };
 }

@@ -1,6 +1,6 @@
 import Observable from '../framework/observable';
 import { getComment } from '../mock/comment';
-import { getRandomInteger, UpdateType } from '../utils/common';
+import { getRandomInteger } from '../utils/common';
 
 export default class CommentsModel extends Observable {
   #filmId = null;
@@ -27,7 +27,6 @@ export default class CommentsModel extends Observable {
       ...this.#comments.slice(0, index),
       ...this.#comments.slice(index + 1),
     ];
-
-    this._notify(UpdateType.COMMENT, update);
+    //this._notify(updateType, {id: update.filmId, comments: this.#comments});
   };
 }

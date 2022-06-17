@@ -1,6 +1,5 @@
 import Observable from '../framework/observable';
 import { getFilm } from '../mock/films';
-import { UpdateType } from '../utils/common';
 
 export default class FilmsModel extends Observable {
   FILMS_COUNT = 14;
@@ -10,7 +9,7 @@ export default class FilmsModel extends Observable {
     return this.#films;
   }
 
-  updateFilm = (update) => {
+  updateFilm = (updateType, update) => {
     const index = this.#films.findIndex((film) => film.id === update.id);
 
     if (index === -1) {
@@ -22,8 +21,7 @@ export default class FilmsModel extends Observable {
       {...this.#films[index],...update},
       ...this.#films.slice(index + 1),
     ];
-
-    this._notify(UpdateType.FILM, update);
+    this._notify(updateType, this.#films[index]);
   };
 
   /* addComment = (updateType, update) => {

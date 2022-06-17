@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { FilterType } from './filter';
 
 export const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
@@ -21,18 +22,10 @@ export const getDuration = (minutes) => {
 };
 
 export const TitleMessage = {
-  ALL: 'There are no movies in our database',
-  WATCHLIST: 'There are no movies to watch now',
-  HISTORY: 'There are no watched movies now',
-  FAVORITES: 'There are no favorite movies now',
-  DEFAULT: 'All movies. Upcoming',
-};
-
-export const FilterType = {
-  ALL: 'ALL',
-  WATCHLIST: 'WATCHLIST',
-  HISTORY: 'HISTORY',
-  FAVORITES: 'FAVORITES',
+  [FilterType.DEFAULT]: 'There are no movies in our database',
+  [FilterType.WATCHLIST]: 'There are no movies to watch now',
+  [FilterType.HISTORY]: 'There are no watched movies now',
+  [FilterType.FAVORITES]: 'There are no favorite movies now',
 };
 
 export const NoFilms = {
@@ -68,13 +61,17 @@ export const CommentEmotion = {
 };
 
 export const UpdateType = {
-  FILM: 'FILM',
-  COMMENT: 'COMMENT'
+  PATCH: 'PATCH',
+  MIN: 'MIN',
+  MID: 'MID',
+  MAX: 'MAX'
 };
 
 export const UserAction = {
   UPDATE_FILM: 'UPDATE_FILM',
+  UPDATE_POPUP: 'UPDATE_POPUP',
   UPDATE_USER_COMMENT: 'UPDATE_USER_COMMENT',
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
+  CHANGE_SORT: 'CHANGE_SORT',
 };
