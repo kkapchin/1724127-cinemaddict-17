@@ -2,9 +2,12 @@ import Observable from '../framework/observable';
 import { getComment } from '../mock/comment';
 import { getRandomInteger } from '../utils/common';
 
+const DEFAULT_USER_COMMENT = { emotion: null, comment: '' };
+
 export default class CommentsModel extends Observable {
   #filmId = null;
   #comments = [];
+  #userComment = DEFAULT_USER_COMMENT;
 
   constructor(filmId) {
     super();
@@ -14,6 +17,10 @@ export default class CommentsModel extends Observable {
 
   get comments() {
     return this.#comments;
+  }
+
+  get userComment() {
+    return this.#userComment;
   }
 
   deleteComment = (update) => {
@@ -27,6 +34,17 @@ export default class CommentsModel extends Observable {
       ...this.#comments.slice(0, index),
       ...this.#comments.slice(index + 1),
     ];
-    //this._notify(updateType, {id: update.filmId, comments: this.#comments});
+  };
+
+  updateUserComment = (update) => {
+    this.#userComment = {...this.#userComment, ...update};
+  };
+
+  addComment = (update) => {
+    this.#comments.push({
+      ...getComment(this.#filmId),
+      ...update
+    });
+    this.#userComment = DEFAULT_USER_COMMENT;
   };
 }

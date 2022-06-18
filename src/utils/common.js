@@ -61,7 +61,6 @@ export const CommentEmotion = {
 };
 
 export const UpdateType = {
-  PATCH: 'PATCH',
   MIN: 'MIN',
   MID: 'MID',
   MAX: 'MAX'

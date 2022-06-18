@@ -8,7 +8,6 @@ import FilmsContainerView from '../view/films-container-view';
 import FilmsListView from '../view/films-list-view';
 import FilmPopupPresenter from './film-popup-presenter';
 import FilmPresenter from './film-presenter';
-//import FiltersPresenter from './filters-presenter';
 import ShowMoreButtonPresenter from './show-more-button-presenter';
 import SortPresenter from './sort-presenter';
 
@@ -112,7 +111,7 @@ export default class FilmsPresenter {
 
     filmPresenter.init({
       ...film,
-      userComment: {...film.userComment, emotion: null},
+      userComment: {...this.#commentsModel.userComment},
       comments:[...this.#commentsModel.get(film.id).comments]
     });
     this.#filmPresenter.set(film.id, filmPresenter);
@@ -148,12 +147,12 @@ export default class FilmsPresenter {
     render(this.#filmsListComponent, this.#mainContainer);
   };
 
-  #updatePopupView(film) {
+  #updatePopupView = (film) => {
     if(!this.#filmPopupPresenter.isRendered) {
       return;
     }
     this.#handleFilmCardClick(film);
-  }
+  };
 
   #handleShowMoreButtonClick = () => {
     const filmsCount = this.films.length;
@@ -175,9 +174,18 @@ export default class FilmsPresenter {
 
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
-      case UserAction.UPDATE_USER_COMMENT:
       case UserAction.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
+        break;
+      case UserAction.UPDATE_USER_COMMENT:
+        this.#commentsModel.get(update.id).updateUserComment(update.userComment);
+        this.#filmsModel.updateFilm(
+          updateType,
+          {...update,
+            userComment: this.#commentsModel.get(update.id).userComment,
+            comments: this.#commentsModel.get(update.id).comments
+          }
+        );
         break;
       case UserAction.DELETE_COMMENT:
         this.#commentsModel.get(update.filmId).deleteComment(update);
@@ -185,8 +193,19 @@ export default class FilmsPresenter {
           updateType,
           {...{
             id: update.filmId,
+            userComment: this.#commentsModel.get(update.filmId).userComment,
             comments: this.#commentsModel.get(update.filmId).comments
           }}
+        );
+        break;
+      case UserAction.ADD_COMMENT:
+        this.#commentsModel.get(update.id).addComment(update.userComment);
+        this.#filmsModel.updateFilm(
+          updateType,
+          {...update,
+            userComment: this.#commentsModel.get(update.id).userComment,
+            comments: this.#commentsModel.get(update.id).comments
+          }
         );
         break;
       case UserAction.CHANGE_SORT:
@@ -197,11 +216,6 @@ export default class FilmsPresenter {
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
-      case UpdateType.PATCH:
-        this.#clearFilmsList();
-        this.#renderFilmsList();
-        this.#updatePopupView(data);
-        break;
       case UpdateType.MIN:
         this.#clearFilmsList();
         this.#renderFilmsList();

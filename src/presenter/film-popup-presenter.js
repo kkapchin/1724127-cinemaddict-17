@@ -49,6 +49,9 @@ export default class FilmPopupPresenter {
     this.#filmPopupComponent.setEmojiClickHandler((emoji) => {
       this.#handleEmojiClick(emoji);
     });
+    this.#filmPopupComponent.setFormSubmitHandler((update) => {
+      this.#handleFormSubmit(update);
+    });
 
     this.#renderComments();
 
@@ -77,6 +80,14 @@ export default class FilmPopupPresenter {
     this.#isRendered = false;
   };
 
+  #handleFormSubmit = (update) => {
+    this.#changeData(
+      UserAction.ADD_COMMENT,
+      UpdateType.MIN,
+      update
+    );
+  };
+
   #handleEscapeKeydown = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
@@ -87,7 +98,7 @@ export default class FilmPopupPresenter {
   #handleAddToWatchlistClick = () => {
     this.#changeData(
       UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
+      UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}}
     );
     this.#resetEmoji();
@@ -96,7 +107,7 @@ export default class FilmPopupPresenter {
   #handleMarkAsWatchedClick = () => {
     this.#changeData(
       UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
+      UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}}
     );
     this.#resetEmoji();
@@ -105,27 +116,31 @@ export default class FilmPopupPresenter {
   #handleMarkAsFavoriteClick = () => {
     this.#changeData(
       UserAction.UPDATE_FILM,
-      UpdateType.PATCH,
+      UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}}
     );
     this.#resetEmoji();
   };
 
-  #handleEmojiClick = (emoji) => {
-    if(!emoji) {
+  #handleEmojiClick = (update) => {
+    if(!update) {
       return;
     }
     this.#changeData(
       UserAction.UPDATE_USER_COMMENT,
-      UpdateType.PATCH,
-      {...this.#film, userComment: {...this.#film.userComment, emotion: emoji}}
+      UpdateType.MIN,
+      update
     );
+    this.#filmPopupComponent
+      .element
+      .querySelector('.film-details__emoji-list')
+      .scrollIntoView({ block: 'center'});
   };
 
   #handleDeleteCommentClick = (comment, filmId) => {
     this.#changeData(
       UserAction.DELETE_COMMENT,
-      UpdateType.PATCH,
+      UpdateType.MIN,
       {...comment, filmId }
     );
   };
