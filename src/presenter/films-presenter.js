@@ -1,5 +1,4 @@
 import { remove } from '../framework/render';
-import CommentsModel from '../model/comments-model';
 import { render } from '../render';
 import { NoFilms, TitleMessage, UpdateType, UserAction } from '../utils/common';
 import { filterFilms, FilterType } from '../utils/filter';
@@ -18,26 +17,34 @@ export default class FilmsPresenter {
   #showMoreButtonPresenter = null;
   #filmPopupPresenter = null;
   #filmPresenter = new Map();
-  #commentsModel = new Map();
+
+  #mainContainer = null;
+
   #filmsContainerComponent = new FilmsContainerView();
   #filmsListComponent = null;
-  #mainContainer = null;
+
+  #commentsModel = null;
   #filmsModel = null;
   #filtersModel = null;
   #sortModel = null;
+
   #renderedFilmsCount = FILMS_COUNT_PER_STEP;
   #filterType = FilterType.DEFAULT;
   #sortType = SortType.DEFAULT;
+  #isLoading = true;
+  #popupId = null;
 
-  constructor(mainContainer, filmsModel, filtersModel, sortModel) {
+  constructor(mainContainer, filmsModel, filtersModel, sortModel, commentsModel) {
     this.#mainContainer = mainContainer;
     this.#filmsModel = filmsModel;
     this.#filtersModel = filtersModel;
     this.#sortModel = sortModel;
+    this.#commentsModel = commentsModel;
 
     this.#filmsModel.addObserver(this.#handleModelEvent);
     this.#filtersModel.addObserver(this.#handleModelEvent);
     this.#sortModel.addObserver(this.#handleModelEvent);
+    this.#commentsModel.addObserver(this.#handleModelEvent);
   }
 
   get films() {
@@ -62,6 +69,12 @@ export default class FilmsPresenter {
   };
 
   #renderFilmsList = () => {
+    if(this.#isLoading === true) {
+      this.#filmsListComponent = new FilmsListView({isLoading: this.#isLoading});
+      render(this.#filmsListComponent, this.#mainContainer);
+      return;
+    }
+
     if (this.films.length === 0) {
       this.#renderNoFilms();
       return;
@@ -89,11 +102,6 @@ export default class FilmsPresenter {
     films
       .slice(0, Math.min(filmsCount, this.#renderedFilmsCount))
       .forEach((film) => {
-        if(!this.#commentsModel.get(film.id)) {
-          const commentsModel = new CommentsModel(film.id);
-          commentsModel.addObserver(this.#handleModelEvent);
-          this.#commentsModel.set(film.id, commentsModel);
-        }
         this.#renderFilm(film);
       });
   };
@@ -101,7 +109,6 @@ export default class FilmsPresenter {
   #renderFilm = (film) => {
     const filmPresenter = new FilmPresenter(
       this.#filmsContainerComponent,
-      this.#mainContainer,
       this.#handleViewAction,
     );
 
@@ -109,11 +116,7 @@ export default class FilmsPresenter {
       this.#handleFilmCardClick(popupFilm);
     });
 
-    filmPresenter.init({
-      ...film,
-      userComment: {...this.#commentsModel.userComment},
-      comments:[...this.#commentsModel.get(film.id).comments]
-    });
+    filmPresenter.init(film);
     this.#filmPresenter.set(film.id, filmPresenter);
   };
 
@@ -125,7 +128,9 @@ export default class FilmsPresenter {
     this.#filmPresenter.clear();
 
     this.#sortPresenter.destroy();
-    this.#showMoreButtonPresenter.destroy();
+    if(this.#showMoreButtonPresenter) {
+      this.#showMoreButtonPresenter.destroy();
+    }
 
     if (resetRenderedFilmsCount) {
       this.#renderedFilmsCount = FILMS_COUNT_PER_STEP;
@@ -143,7 +148,7 @@ export default class FilmsPresenter {
       remove(this.#filmsListComponent);
     }
     const titleMessageKey = this.#filterType;
-    this.#filmsListComponent = new FilmsListView(NoFilms.TRUE, TitleMessage[titleMessageKey]);
+    this.#filmsListComponent = new FilmsListView({isEmptyList: NoFilms.TRUE, message: TitleMessage[titleMessageKey]});
     render(this.#filmsListComponent, this.#mainContainer);
   };
 
@@ -168,8 +173,16 @@ export default class FilmsPresenter {
   };
 
   #handleFilmCardClick = (film) => {
-    this.#filmPopupPresenter.destroy();
-    this.#filmPopupPresenter.init(film);
+    this.#commentsModel.init(film.id)
+      .finally(() => {
+        this.#filmPopupPresenter.destroy();
+        this.#filmPopupPresenter.init({
+          ...film,
+          userComment: {...this.#commentsModel.userComment},
+          comments:[...this.#commentsModel.comments]
+        });
+      });
+    this.#popupId = film.id;
   };
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -178,23 +191,23 @@ export default class FilmsPresenter {
         this.#filmsModel.updateFilm(updateType, update);
         break;
       case UserAction.UPDATE_USER_COMMENT:
-        this.#commentsModel.get(update.id).updateUserComment(update.userComment);
+        this.#commentsModel.updateUserComment(update.userComment);
         this.#filmsModel.updateFilm(
           updateType,
           {...update,
-            userComment: this.#commentsModel.get(update.id).userComment,
-            comments: this.#commentsModel.get(update.id).comments
+            userComment: this.#commentsModel.userComment,
+            comments: this.#commentsModel.setFilmId(update.id).comments
           }
         );
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.get(update.filmId).deleteComment(update);
+        this.#commentsModel.deleteComment(update);
         this.#filmsModel.updateFilm(
           updateType,
           {...{
             id: update.filmId,
-            userComment: this.#commentsModel.get(update.filmId).userComment,
-            comments: this.#commentsModel.get(update.filmId).comments
+            userComment: this.#commentsModel.userComment,
+            comments: this.#commentsModel.comments
           }}
         );
         break;
@@ -219,7 +232,9 @@ export default class FilmsPresenter {
       case UpdateType.MIN:
         this.#clearFilmsList();
         this.#renderFilmsList();
-        this.#updatePopupView(data);
+        if(this.#popupId === data.id) {
+          this.#updatePopupView(data);
+        }
         break;
       case UpdateType.MID:
         this.#clearFilmsList({resetRenderedFilmsCount: true});
@@ -228,6 +243,12 @@ export default class FilmsPresenter {
       case UpdateType.MAX:
         this.#clearFilmsList({resetRenderedFilmsCount: true, resetSortType: true});
         this.#renderFilmsList();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        this.#clearFilmsList();
+        this.#renderFilmsList();
+        break;
     }
   };
 }

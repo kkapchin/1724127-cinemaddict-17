@@ -26,6 +26,7 @@ export const TitleMessage = {
   [FilterType.WATCHLIST]: 'There are no movies to watch now',
   [FilterType.HISTORY]: 'There are no watched movies now',
   [FilterType.FAVORITES]: 'There are no favorite movies now',
+  LOADING: 'Loading...',
 };
 
 export const NoFilms = {
@@ -63,7 +64,8 @@ export const CommentEmotion = {
 export const UpdateType = {
   MIN: 'MIN',
   MID: 'MID',
-  MAX: 'MAX'
+  MAX: 'MAX',
+  INIT: 'INIT',
 };
 
 export const UserAction = {

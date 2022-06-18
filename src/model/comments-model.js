@@ -1,23 +1,30 @@
 import Observable from '../framework/observable';
 import { getComment } from '../mock/comment';
-import { getRandomInteger } from '../utils/common';
 
 const DEFAULT_USER_COMMENT = { emotion: null, comment: '' };
 
 export default class CommentsModel extends Observable {
+  #commentsApiService = null;
   #filmId = null;
   #comments = [];
   #userComment = DEFAULT_USER_COMMENT;
 
-  constructor(filmId) {
+  constructor(commentsApiService) {
     super();
-    this.#filmId = filmId;
-    this.#comments = [...new Array(getRandomInteger(3, 5)).fill().map(() => getComment(this.#filmId))];
+    this.#commentsApiService = commentsApiService;
   }
 
   get comments() {
     return this.#comments;
   }
+
+  init = async (filmId) => {
+    try {
+      this.#comments = await this.#commentsApiService.getComments(filmId);
+    } catch(err) {
+      this.#comments = [];
+    }
+  };
 
   get userComment() {
     return this.#userComment;
