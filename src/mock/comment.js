@@ -1,4 +1,5 @@
 import { getRandomInteger } from '../utils/common';
+import { nanoid } from 'nanoid';
 
 const authors = [
   'Goblin Puchkov',
@@ -32,7 +33,7 @@ export const getComment = (id) => {
   const index = getRandomInteger(0, 5);
 
   return {
-    id: id,
+    id: `${id} + ${nanoid()}`,
     author: authors[index],
     comment: comments[index],
     date: `20${getRandomInteger(10, 99)}-02-02T21:59:32.554Z`,

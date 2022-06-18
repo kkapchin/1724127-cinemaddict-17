@@ -16,7 +16,7 @@ export default class ShowMoreButtonPresenter {
     render(this.#buttonComponent, this.#container);
   }
 
-  remove() {
+  destroy() {
     remove(this.#buttonComponent);
   }
 

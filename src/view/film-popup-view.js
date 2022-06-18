@@ -1,3 +1,4 @@
+import he from 'he';
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { CommentEmotion, getDuration } from '../utils/common';
@@ -107,7 +108,7 @@ const createFilmPopupTemplate = (film) => {
                 ${film.userComment.emotion ? `<img src="images/emoji/${film.userComment.emotion}.png" alt="emoji-${film.userComment.emotion}" width="55" height="55">` : ''}
               </div>
               <label class="film-details__comment-label">
-                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${film.userComment.comment ? he.encode(film.userComment.comment) : ''}</textarea>
               </label>
               <div class="film-details__emoji-list">
                 <input
@@ -163,9 +164,10 @@ const createFilmPopupTemplate = (film) => {
 };
 
 export default class FilmPopupView extends AbstractStatefulView {
-  constructor (film, userComment = {}) {
+  constructor (film) {
     super();
-    this._setState({...film, ...{userComment}});
+    this._setState({...film});
+    this.#setInnerHandlers();
   }
 
   get template() {
@@ -173,6 +175,8 @@ export default class FilmPopupView extends AbstractStatefulView {
   }
 
   _restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
     this.setCloseButtonClickHandler(this._callback.closeButtonClick);
     this.setAddToWatchlistClickHandler(this._callback.addToWatchlistClick);
     this.setMarkAsWatchedClickHandler(this._callback.markAsWatchedClick);
@@ -180,33 +184,74 @@ export default class FilmPopupView extends AbstractStatefulView {
     this.setEmojiClickHandler(this._callback.emojiClick);
   };
 
+  #setInnerHandlers = () => {
+    this.element
+      .querySelector('.film-details__comment-input')
+      .addEventListener('input', this.#userCommentInputHandler);
+  };
+
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element
+      .querySelector('.film-details__comment-input')
+      .addEventListener('keydown', this.#formSubmitHandler);
+  };
+
   setCloseButtonClickHandler = (callback) => {
     this._callback.closeButtonClick = callback;
-    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closeButtonClickHandler);
+    this.element
+      .querySelector('.film-details__close-btn')
+      .addEventListener('click', this.#closeButtonClickHandler);
   };
 
   setAddToWatchlistClickHandler = (callback) => {
     this._callback.addToWatchlistClick = callback;
-    this.element.querySelector('.film-details__control-button--watchlist')
+    this.element
+      .querySelector('.film-details__control-button--watchlist')
       .addEventListener('click', this.#addToWatchlistClickHandler);
   };
 
   setMarkAsWatchedClickHandler = (callback) => {
     this._callback.markAsWatchedClick = callback;
-    this.element.querySelector('.film-details__control-button--watched')
+    this.element
+      .querySelector('.film-details__control-button--watched')
       .addEventListener('click', this.#markAsWatchedClickHandler);
   };
 
   setMarkAsFavoriteClickHandler = (callback) => {
     this._callback.markAsFavoriteClick = callback;
-    this.element.querySelector('.film-details__control-button--favorite')
+    this.element
+      .querySelector('.film-details__control-button--favorite')
       .addEventListener('click', this.#markAsFavoriteClickHandler);
   };
 
   setEmojiClickHandler = (callback) => {
     this._callback.emojiClick = callback;
-    this.element.querySelector('.film-details__emoji-list')
+    this.element
+      .querySelector('.film-details__emoji-list')
       .addEventListener('click', this.#emojiClickHandler);
+  };
+
+  #userCommentInputHandler = (evt) => {
+    evt.preventDefault();
+    this._setState({
+      ...this._state,
+      userComment: {
+        ...this._state.userComment,
+        comment: evt.target.value
+      }
+    });
+  };
+
+  #formSubmitHandler = (evt) => {
+    if(!this._state.userComment.emotion || !this._state.userComment.comment) {
+      return;
+    }
+    evt.preventDefault();
+    if(evt.ctrlKey === true && evt.key === 'Enter') {
+      this._callback.formSubmit(this._state);
+      document.removeEventListener('keydown', this.#formSubmitHandler);
+    }
   };
 
   #closeButtonClickHandler = () => {
@@ -232,10 +277,15 @@ export default class FilmPopupView extends AbstractStatefulView {
     if (evt.target.tagName !== 'IMG') {
       return;
     }
-
     const emotion = evt.target.parentElement.control.defaultValue;
     evt.preventDefault();
-    this._callback.emojiClick(emotion);
-    this.element.querySelector('.film-details__emoji-list').scrollIntoView({ block: 'center'});
+    this._setState({
+      ...this._state,
+      userComment: {
+        ...this._state.userComment,
+        emotion
+      }
+    });
+    this._callback.emojiClick(this._state);
   };
 }

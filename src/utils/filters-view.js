@@ -1,7 +1,8 @@
-import AbstractView from '../framework/view/abstract-view';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+//import AbstractView from '../framework/view/abstract-view';
 import { FilterType } from '../utils/common';
 
-const createNavigationTemplate = (filter, quantity) => (
+const createFiltersTemplate = (filter, quantity) => (
   `<nav class="main-navigation">
     <a href="#all" class="main-navigation__item ${filter === FilterType.ALL ? 'main-navigation__item--active' : ''}">All movies</a>
     <a href="#watchlist" class="main-navigation__item  ${filter === FilterType.WATCHLIST ? 'main-navigation__item--active' : ''}">Watchlist <span class="main-navigation__item-count">${quantity[FilterType.WATCHLIST]}</span></a>
@@ -10,17 +11,13 @@ const createNavigationTemplate = (filter, quantity) => (
   </nav>`
 );
 
-export default class NavigationView extends AbstractView {
-  #currentFilter = null;
-  #quantity = null;
-
+export default class FiltersView extends AbstractStatefulView {
   constructor(filter, quantity) {
     super();
-    this.#currentFilter = filter;
-    this.#quantity = quantity;
+    this._setState({filter, quantity});
   }
 
   get template() {
-    return createNavigationTemplate(this.#currentFilter, this.#quantity);
+    return createFiltersTemplate(this._state.filter, this._state.quantity);
   }
 }
