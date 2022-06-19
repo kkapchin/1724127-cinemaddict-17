@@ -8,6 +8,7 @@ export default class FilmPopupPresenter {
   #film = {};
   #mainContainer = null;
   #filmPopupComponent = null;
+  #commentComponent = new Map();
   #changeData = null;
   #comments = [];
   #isRendered = false;
@@ -25,6 +26,22 @@ export default class FilmPopupPresenter {
   get isRendered() {
     return this.#isRendered;
   }
+
+  setCommentDeleting = (commentId) => {
+    this.#commentComponent.get(commentId).setDeleting();
+  };
+
+  setAborting = (commentId) => {
+    const resetCommentState = () => {
+      this.#commentComponent
+        .get(commentId)
+        .updateElement({isDeleting: false});
+    };
+
+    this.#commentComponent
+      .get(commentId)
+      .shake(resetCommentState);
+  };
 
   destroy = () => {
     this.#closePopup();
@@ -63,8 +80,9 @@ export default class FilmPopupPresenter {
   #renderComments = () => {
     this.#comments = this.#film.popupComments.sort(sortCommentsByDate);
     this.#comments.map((comment) => {
-      const filmCommentComponent = new CommentView(comment, this.#film.id);
+      const filmCommentComponent = new CommentView(comment);
       filmCommentComponent.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
+      this.#commentComponent.set(comment.id, filmCommentComponent);
       render(filmCommentComponent, this.#filmPopupComponent.element.querySelector('.film-details__comments-list'));
     });
   };
@@ -77,6 +95,7 @@ export default class FilmPopupPresenter {
     this.#mainContainer.parentElement.classList.remove('hide-overflow');
     remove(this.#filmPopupComponent);
     this.#isRendered = false;
+    this.#commentComponent.clear();
   };
 
   #handleFormSubmit = (update) => {

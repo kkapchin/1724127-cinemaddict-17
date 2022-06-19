@@ -190,18 +190,21 @@ export default class FilmsPresenter {
         this.#filmsModel.updateFilm(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(update.commentId)
-          .finally(() => {
-            this.#filmsModel.updateFilm(
-              updateType,
-              {...update.film,
-                popupComments: [...this.#commentsModel.comments]
-              }
-            );
-          });
+        this.#filmPopupPresenter.setCommentDeleting(update.commentId);
+        try {
+          await this.#commentsModel.deleteComment(update.commentId);
+          this.#filmsModel.updateFilm(
+            updateType,
+            {...update.film,
+              popupComments: [...this.#commentsModel.comments]
+            }
+          );
+        }catch(err) {
+          this.#filmPopupPresenter.setAborting(update.commentId);
+        }
         break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(update.userComment, update.id)
+        await this.#commentsModel.addComment(update.userComment, update.id)
           .finally(() => {
             delete update.userComment;
             this.#filmsModel.updateFilm(
