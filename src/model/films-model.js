@@ -32,10 +32,7 @@ export default class FilmsModel extends Observable {
       throw new Error('Can\'t update unexisting film');
     }
 
-    if(update.userComment) {
-      update.comments = [...update.comments.map((comment) => comment.id)];
-      delete update['userComment'];
-    }
+    delete update.popupComments;
 
     try {
       const response = await this.#filmsApiService.updateFilm(update);

@@ -178,8 +178,7 @@ export default class FilmsPresenter {
         this.#filmPopupPresenter.destroy();
         this.#filmPopupPresenter.init({
           ...film,
-          userComment: {...this.#commentsModel.userComment},
-          comments:[...this.#commentsModel.comments]
+          popupComments:[...this.#commentsModel.comments]
         });
       });
     this.#popupId = film.id;
@@ -190,36 +189,26 @@ export default class FilmsPresenter {
       case UserAction.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
         break;
-      case UserAction.UPDATE_USER_COMMENT:
-        this.#commentsModel.updateUserComment(update.userComment);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...update,
-            userComment: this.#commentsModel.userComment,
-            comments: this.#commentsModel.setFilmId(update.id).comments
-          }
-        );
-        break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(update);
+        /* this.#commentsModel.deleteComment(update);
         this.#filmsModel.updateFilm(
           updateType,
           {...{
             id: update.filmId,
-            userComment: this.#commentsModel.userComment,
+            //userComment: this.#commentsModel.userComment,
             comments: this.#commentsModel.comments
           }}
-        );
+        ); */
         break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.get(update.id).addComment(update.userComment);
+        /* this.#commentsModel.get(update.id).addComment(update.userComment);
         this.#filmsModel.updateFilm(
           updateType,
           {...update,
-            userComment: this.#commentsModel.get(update.id).userComment,
+            //userComment: this.#commentsModel.get(update.id).userComment,
             comments: this.#commentsModel.get(update.id).comments
           }
-        );
+        ); */
         break;
       case UserAction.CHANGE_SORT:
         this.#sortModel.setSort(updateType, update);

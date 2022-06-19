@@ -26,10 +26,6 @@ export default class CommentsModel extends Observable {
     }
   };
 
-  get userComment() {
-    return this.#userComment;
-  }
-
   deleteComment = (update) => {
     const index = this.#comments.findIndex((comment) => comment.id === update.id);
 

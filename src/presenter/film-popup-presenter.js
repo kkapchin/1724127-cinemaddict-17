@@ -46,8 +46,8 @@ export default class FilmPopupPresenter {
     this.#filmPopupComponent.setMarkAsFavoriteClickHandler(() => {
       this.#handleMarkAsFavoriteClick();
     });
-    this.#filmPopupComponent.setEmojiClickHandler((emoji) => {
-      this.#handleEmojiClick(emoji);
+    this.#filmPopupComponent.setEmojiClickHandler(() => {
+      this.#renderComments();
     });
     this.#filmPopupComponent.setFormSubmitHandler((update) => {
       this.#handleFormSubmit(update);
@@ -61,7 +61,7 @@ export default class FilmPopupPresenter {
   };
 
   #renderComments = () => {
-    this.#comments = this.#film.comments.sort(sortCommentsByDate);
+    this.#comments = this.#film.popupComments.sort(sortCommentsByDate);
     this.#comments.map((comment) => {
       const filmCommentComponent = new CommentView(comment, this.#film.id);
       filmCommentComponent.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
@@ -73,7 +73,6 @@ export default class FilmPopupPresenter {
     if(!this.#filmPopupComponent) {
       return;
     }
-    this.#resetEmoji();
     document.removeEventListener('keydown', this.#handleEscapeKeydown);
     this.#mainContainer.parentElement.classList.remove('hide-overflow');
     remove(this.#filmPopupComponent);
@@ -101,7 +100,6 @@ export default class FilmPopupPresenter {
       UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, watchlist: !this.#film.userDetails.watchlist}}
     );
-    this.#resetEmoji();
   };
 
   #handleMarkAsWatchedClick = () => {
@@ -110,7 +108,6 @@ export default class FilmPopupPresenter {
       UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, alreadyWatched: !this.#film.userDetails.alreadyWatched}}
     );
-    this.#resetEmoji();
   };
 
   #handleMarkAsFavoriteClick = () => {
@@ -119,22 +116,6 @@ export default class FilmPopupPresenter {
       UpdateType.MIN,
       {...this.#film, userDetails: {...this.#film.userDetails, favorite: !this.#film.userDetails.favorite}}
     );
-    this.#resetEmoji();
-  };
-
-  #handleEmojiClick = (update) => {
-    if(!update) {
-      return;
-    }
-    this.#changeData(
-      UserAction.UPDATE_USER_COMMENT,
-      UpdateType.MIN,
-      update
-    );
-    this.#filmPopupComponent
-      .element
-      .querySelector('.film-details__emoji-list')
-      .scrollIntoView({ block: 'center'});
   };
 
   #handleDeleteCommentClick = (comment, filmId) => {
@@ -143,9 +124,5 @@ export default class FilmPopupPresenter {
       UpdateType.MIN,
       {...comment, filmId }
     );
-  };
-
-  #resetEmoji = () => {
-    this.#handleEmojiClick(null);
   };
 }

@@ -3,7 +3,14 @@ import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { CommentEmotion, getDuration } from '../utils/common';
 
-const createFilmPopupTemplate = (film) => {
+const createEmojiImgTemplate = (emoji) => {
+  if(!emoji) {
+    return '';
+  }
+  return `<img src="images/emoji/${emoji}.png" alt="emoji-${emoji}" width="55" height="55"></img>`;
+};
+
+const createFilmPopupTemplate = (film, userEmotion, userComment) => {
   const { title, totalRating, genre, description, poster, ageRating, director } = film.filmInfo;
   const { watchlist, alreadyWatched, favorite } = film.userDetails;
   const writers = film.filmInfo.writers.join(', ');
@@ -13,6 +20,7 @@ const createFilmPopupTemplate = (film) => {
   //const comments = film.comments;
   const releaseDate = dayjs(film.filmInfo.release.date).format('D MMMM YYYY');
   const duration = getDuration(film.filmInfo.runtime);
+  const emojiImgTemplate = createEmojiImgTemplate(userEmotion);
   //console.log(film.userComment.emotion)
   return (
     `<section class="film-details">
@@ -105,10 +113,10 @@ const createFilmPopupTemplate = (film) => {
             <ul class="film-details__comments-list"></ul>
             <div class="film-details__new-comment">
               <div class="film-details__add-emoji-label">
-                ${film.userComment.emotion ? `<img src="images/emoji/${film.userComment.emotion}.png" alt="emoji-${film.userComment.emotion}" width="55" height="55">` : ''}
+                ${emojiImgTemplate}
               </div>
               <label class="film-details__comment-label">
-                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${film.userComment.comment ? he.encode(film.userComment.comment) : ''}</textarea>
+                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${userComment ? he.encode(userComment) : ''}</textarea>
               </label>
               <div class="film-details__emoji-list">
                 <input
@@ -117,7 +125,7 @@ const createFilmPopupTemplate = (film) => {
                   type="radio"
                   id="emoji-smile"
                   value="smile"
-                  ${film.userComment.emotion === CommentEmotion.SMILE ? 'checked' : ''}
+                  ${userEmotion === CommentEmotion.SMILE ? 'checked' : ''}
                 >
                 <label class="film-details__emoji-label" for="emoji-smile">
                   <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
@@ -128,7 +136,7 @@ const createFilmPopupTemplate = (film) => {
                   type="radio"
                   id="emoji-sleeping"
                   value="sleeping"
-                  ${film.userComment.emotion === CommentEmotion.SLEEPING ? 'checked' : ''}
+                  ${userEmotion === CommentEmotion.SLEEPING ? 'checked' : ''}
                 >
                 <label class="film-details__emoji-label" for="emoji-sleeping">
                   <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
@@ -139,7 +147,7 @@ const createFilmPopupTemplate = (film) => {
                   type="radio"
                   id="emoji-puke"
                   value="puke"
-                  ${film.userComment.emotion === CommentEmotion.PUKE ? 'checked' : ''}
+                  ${userEmotion === CommentEmotion.PUKE ? 'checked' : ''}
                 >
                 <label class="film-details__emoji-label" for="emoji-puke">
                   <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
@@ -150,7 +158,7 @@ const createFilmPopupTemplate = (film) => {
                   type="radio"
                   id="emoji-angry"
                   value="angry"
-                  ${film.userComment.emotion === CommentEmotion.ANGRY ? 'checked' : ''}
+                  ${userEmotion === CommentEmotion.ANGRY ? 'checked' : ''}
                 >
                 <label class="film-details__emoji-label" for="emoji-angry">
                   <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
@@ -164,6 +172,9 @@ const createFilmPopupTemplate = (film) => {
 };
 
 export default class FilmPopupView extends AbstractStatefulView {
+  #userEmotion = null;
+  #userComment = '';
+
   constructor (film) {
     super();
     this._setState({...film});
@@ -171,7 +182,7 @@ export default class FilmPopupView extends AbstractStatefulView {
   }
 
   get template() {
-    return createFilmPopupTemplate(this._state);
+    return createFilmPopupTemplate(this._state, this.#userEmotion, this.#userComment);
   }
 
   _restoreHandlers = () => {
@@ -186,8 +197,11 @@ export default class FilmPopupView extends AbstractStatefulView {
 
   #setInnerHandlers = () => {
     this.element
-      .querySelector('.film-details__comment-input')
+      .querySelector('.film-details__comment-label')
       .addEventListener('input', this.#userCommentInputHandler);
+    this.element
+      .querySelector('.film-details__emoji-list')
+      .addEventListener('click', this.#emojiClickHandler);
   };
 
   setFormSubmitHandler = (callback) => {
@@ -227,6 +241,7 @@ export default class FilmPopupView extends AbstractStatefulView {
 
   setEmojiClickHandler = (callback) => {
     this._callback.emojiClick = callback;
+    this._callback.renderComments = callback;
     this.element
       .querySelector('.film-details__emoji-list')
       .addEventListener('click', this.#emojiClickHandler);
@@ -234,20 +249,10 @@ export default class FilmPopupView extends AbstractStatefulView {
 
   #userCommentInputHandler = (evt) => {
     evt.preventDefault();
-    this._setState({
-      ...this._state,
-      userComment: {
-        ...this._state.userComment,
-        comment: evt.target.value
-      }
-    });
+    this.#userComment = evt.target.value;
   };
 
   #formSubmitHandler = (evt) => {
-    if(!this._state.userComment.emotion || !this._state.userComment.comment) {
-      return;
-    }
-    evt.preventDefault();
     if(evt.ctrlKey === true && evt.key === 'Enter') {
       this._callback.formSubmit(this._state);
       document.removeEventListener('keydown', this.#formSubmitHandler);
@@ -277,15 +282,18 @@ export default class FilmPopupView extends AbstractStatefulView {
     if (evt.target.tagName !== 'IMG') {
       return;
     }
+
     const emotion = evt.target.parentElement.control.defaultValue;
     evt.preventDefault();
-    this._setState({
-      ...this._state,
-      userComment: {
-        ...this._state.userComment,
-        emotion
-      }
-    });
-    this._callback.emojiClick(this._state);
+
+    this.#userEmotion = emotion;
+    this.updateElement({...this._state});
+
+    this._callback.renderComments();
+
+    this
+      .element
+      .querySelector('.film-details__emoji-list')
+      .scrollIntoView({ block: 'center'});
   };
 }
