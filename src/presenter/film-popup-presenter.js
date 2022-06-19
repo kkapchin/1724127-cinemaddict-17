@@ -3,11 +3,13 @@ import { UpdateType, UserAction } from '../utils/common';
 import { sortCommentsByDate } from '../utils/sort';
 import CommentView from '../view/comment-view';
 import FilmPopupView from '../view/film-popup-view';
+import PopupControlsView from '../view/popup-controls-view';
 
 export default class FilmPopupPresenter {
   #film = {};
   #mainContainer = null;
   #filmPopupComponent = null;
+  #popupControlsComponent = null;
   #commentComponent = new Map();
   #changeData = null;
   #comments = [];
@@ -31,7 +33,7 @@ export default class FilmPopupPresenter {
     this.#commentComponent.get(commentId).setDeleting();
   };
 
-  setAborting = (commentId) => {
+  setAbortingCommentDeleting = (commentId) => {
     const resetCommentState = () => {
       this.#commentComponent
         .get(commentId)
@@ -43,33 +45,37 @@ export default class FilmPopupPresenter {
       .shake(resetCommentState);
   };
 
+  setAbortingControlSwitching = () => {
+    const resetPopupControlsState = () => {
+      this.#popupControlsComponent
+        .updateElement({isDisabled: false});
+    };
+
+    this.#popupControlsComponent
+      .shake(resetPopupControlsState);
+  };
+
+  setControlsSwitching = () => {
+    this.#popupControlsComponent.setSwitching();
+  };
+
   destroy = () => {
     this.#closePopup();
   };
 
   #renderPopup = () => {
-    this.#filmPopupComponent = new FilmPopupView(this.#film);
+    this.#filmPopupComponent = new FilmPopupView(this.#film, this.#renderComments, this.#renderControls);
+
     document.addEventListener('keydown', this.#handleEscapeKeydown);
 
     this.#filmPopupComponent.setCloseButtonClickHandler(() => {
       this.#closePopup();
     });
-    this.#filmPopupComponent.setAddToWatchlistClickHandler(() => {
-      this.#handleAddToWatchlistClick();
-    });
-    this.#filmPopupComponent.setMarkAsWatchedClickHandler(() => {
-      this.#handleMarkAsWatchedClick();
-    });
-    this.#filmPopupComponent.setMarkAsFavoriteClickHandler(() => {
-      this.#handleMarkAsFavoriteClick();
-    });
-    this.#filmPopupComponent.setEmojiClickHandler(() => {
-      this.#renderComments();
-    });
     this.#filmPopupComponent.setFormSubmitHandler((update) => {
       this.#handleFormSubmit(update);
     });
 
+    this.#renderControls();
     this.#renderComments();
 
     this.#mainContainer.parentElement.classList.add('hide-overflow');
@@ -85,6 +91,26 @@ export default class FilmPopupPresenter {
       this.#commentComponent.set(comment.id, filmCommentComponent);
       render(filmCommentComponent, this.#filmPopupComponent.element.querySelector('.film-details__comments-list'));
     });
+  };
+
+  #renderControls = () => {
+    this.#popupControlsComponent = new PopupControlsView(this.#film.userDetails);
+
+    this.#popupControlsComponent.setAddToWatchlistClickHandler(() => {
+      this.#handleAddToWatchlistClick();
+    });
+    this.#popupControlsComponent.setMarkAsWatchedClickHandler(() => {
+      this.#handleMarkAsWatchedClick();
+    });
+    this.#popupControlsComponent.setMarkAsFavoriteClickHandler(() => {
+      this.#handleMarkAsFavoriteClick();
+    });
+
+    render(
+      this.#popupControlsComponent,
+      this.#filmPopupComponent.element
+        .querySelector('.film-details__top-container')
+    );
   };
 
   #closePopup = () => {

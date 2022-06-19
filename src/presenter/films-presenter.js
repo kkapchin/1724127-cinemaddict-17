@@ -187,7 +187,12 @@ export default class FilmsPresenter {
   #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
+        this.#filmPopupPresenter.setControlsSwitching();
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch(err) {
+          this.#filmPopupPresenter.setAbortingControlSwitching();
+        }
         break;
       case UserAction.DELETE_COMMENT:
         this.#filmPopupPresenter.setCommentDeleting(update.commentId);
@@ -200,7 +205,7 @@ export default class FilmsPresenter {
             }
           );
         }catch(err) {
-          this.#filmPopupPresenter.setAborting(update.commentId);
+          this.#filmPopupPresenter.setAbortingCommentDeleting(update.commentId);
         }
         break;
       case UserAction.ADD_COMMENT:
