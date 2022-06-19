@@ -3,19 +3,14 @@ import { UpdateType, UserAction } from '../utils/common';
 import FilmCardView from '../view/film-card-view';
 
 export default class FilmPresenter {
-  #filmPopupComponent = null;
   #filmCardComponent = null;
   #filmContainer = null;
-  #mainContainer = null;
   #film = {};
-  #comments = null;
-  #resetFilmsList = null;
   #changeData = null;
   _callback = {};
 
-  constructor(container, mainContainer, changeData) {
+  constructor(container, changeData) {
     this.#filmContainer = container;
-    this.#mainContainer = mainContainer;
     this.#changeData = changeData;
   }
 
