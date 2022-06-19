@@ -118,11 +118,11 @@ export default class FilmPopupPresenter {
     );
   };
 
-  #handleDeleteCommentClick = (comment, filmId) => {
+  #handleDeleteCommentClick = (commentId) => {
     this.#changeData(
       UserAction.DELETE_COMMENT,
       UpdateType.MIN,
-      {...comment, filmId }
+      {commentId, film: this.#film }
     );
   };
 }

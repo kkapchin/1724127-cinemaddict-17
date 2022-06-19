@@ -25,12 +25,10 @@ const createCommentTemplate = (comment) => {
 
 export default class CommentView extends AbstractView{
   #comment = null;
-  #filmId = null;
 
-  constructor(comment, filmId) {
+  constructor(comment) {
     super();
     this.#comment = comment;
-    this.#filmId = filmId;
   }
 
   get template() {
@@ -46,6 +44,6 @@ export default class CommentView extends AbstractView{
 
   #deleteButtonClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.deleteButtonClick(this.#comment, this.#filmId);
+    this._callback.deleteButtonClick(this.#comment.id);
   };
 }

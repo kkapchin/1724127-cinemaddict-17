@@ -190,15 +190,15 @@ export default class FilmsPresenter {
         this.#filmsModel.updateFilm(updateType, update);
         break;
       case UserAction.DELETE_COMMENT:
-        /* this.#commentsModel.deleteComment(update);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...{
-            id: update.filmId,
-            //userComment: this.#commentsModel.userComment,
-            comments: this.#commentsModel.comments
-          }}
-        ); */
+        this.#commentsModel.deleteComment(update.commentId)
+          .finally(() => {
+            this.#filmsModel.updateFilm(
+              updateType,
+              {...update.film,
+                popupComments: [...this.#commentsModel.comments]
+              }
+            );
+          });
         break;
       case UserAction.ADD_COMMENT:
         this.#commentsModel.addComment(update.userComment, update.id)
