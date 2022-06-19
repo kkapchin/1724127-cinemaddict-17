@@ -76,3 +76,9 @@ export const UserAction = {
   DELETE_COMMENT: 'DELETE_COMMENT',
   CHANGE_SORT: 'CHANGE_SORT',
 };
+
+export const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+};

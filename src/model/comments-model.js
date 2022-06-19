@@ -1,13 +1,8 @@
 import Observable from '../framework/observable';
-import { getComment } from '../mock/comment';
-
-const DEFAULT_USER_COMMENT = { emotion: null, comment: '' };
 
 export default class CommentsModel extends Observable {
   #commentsApiService = null;
-  #filmId = null;
   #comments = [];
-  #userComment = DEFAULT_USER_COMMENT;
 
   constructor(commentsApiService) {
     super();
@@ -39,15 +34,11 @@ export default class CommentsModel extends Observable {
     ];
   };
 
-  updateUserComment = (update) => {
-    this.#userComment = {...this.#userComment, ...update};
-  };
-
-  addComment = (update) => {
-    this.#comments.push({
-      ...getComment(this.#filmId),
-      ...update
-    });
-    this.#userComment = DEFAULT_USER_COMMENT;
+  addComment = async (update, filmId) => {
+    try {
+      await this.#commentsApiService.addComment(update, filmId);
+    } catch(err) {
+      throw new Error('Can\'t add comment');
+    }
   };
 }

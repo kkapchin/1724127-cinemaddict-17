@@ -184,7 +184,7 @@ export default class FilmsPresenter {
     this.#popupId = film.id;
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
         this.#filmsModel.updateFilm(updateType, update);
@@ -201,14 +201,16 @@ export default class FilmsPresenter {
         ); */
         break;
       case UserAction.ADD_COMMENT:
-        /* this.#commentsModel.get(update.id).addComment(update.userComment);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...update,
-            //userComment: this.#commentsModel.get(update.id).userComment,
-            comments: this.#commentsModel.get(update.id).comments
-          }
-        ); */
+        this.#commentsModel.addComment(update.userComment, update.id)
+          .finally(() => {
+            delete update.userComment;
+            this.#filmsModel.updateFilm(
+              updateType,
+              {...update,
+                popupComments: [...this.#commentsModel.comments]
+              }
+            );
+          });
         break;
       case UserAction.CHANGE_SORT:
         this.#sortModel.setSort(updateType, update);

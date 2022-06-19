@@ -1,9 +1,5 @@
 import ApiService from './framework/api-service';
-
-const Method = {
-  GET: 'GET',
-  PUT: 'PUT',
-};
+import { Method } from './utils/common';
 
 export default class FilmsApiService extends ApiService {
   get films() {

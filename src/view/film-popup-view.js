@@ -254,7 +254,13 @@ export default class FilmPopupView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     if(evt.ctrlKey === true && evt.key === 'Enter') {
-      this._callback.formSubmit(this._state);
+      this._callback.formSubmit({
+        ...this._state,
+        userComment: {
+          comment: this.#userComment,
+          emotion: this.#userEmotion
+        }
+      });
       document.removeEventListener('keydown', this.#formSubmitHandler);
     }
   };
