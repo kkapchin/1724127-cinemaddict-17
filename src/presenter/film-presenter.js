@@ -44,7 +44,7 @@ export default class FilmPresenter {
         .updateElement({isDisabled: false});
     };
 
-    this.#controlsComponent
+    this.#filmCardComponent
       .shake(resetControlsState);
   };
 
