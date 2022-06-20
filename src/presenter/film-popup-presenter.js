@@ -3,6 +3,7 @@ import { UpdateType, UserAction } from '../utils/common';
 import { sortCommentsByDate } from '../utils/sort';
 import CommentView from '../view/comment-view';
 import FilmPopupView from '../view/film-popup-view';
+import NewCommentView from '../view/new-comment-view';
 import PopupControlsView from '../view/popup-controls-view';
 
 export default class FilmPopupPresenter {
@@ -10,6 +11,7 @@ export default class FilmPopupPresenter {
   #mainContainer = null;
   #filmPopupComponent = null;
   #popupControlsComponent = null;
+  #newCommentFormComponent = null;
   #commentComponent = new Map();
   #changeData = null;
   #comments = [];
@@ -33,7 +35,15 @@ export default class FilmPopupPresenter {
     this.#commentComponent.get(commentId).setDeleting();
   };
 
-  setAbortingCommentDeleting = (commentId) => {
+  setControlsSwitching = () => {
+    this.#popupControlsComponent.setSwitching();
+  };
+
+  setCommentAdding = () => {
+    this.#newCommentFormComponent.setSubmitting();
+  };
+
+  setCommentDeleteAborting = (commentId) => {
     const resetCommentState = () => {
       this.#commentComponent
         .get(commentId)
@@ -45,7 +55,7 @@ export default class FilmPopupPresenter {
       .shake(resetCommentState);
   };
 
-  setAbortingControlSwitching = () => {
+  setControlSwitchAborting = () => {
     const resetPopupControlsState = () => {
       this.#popupControlsComponent
         .updateElement({isDisabled: false});
@@ -55,8 +65,14 @@ export default class FilmPopupPresenter {
       .shake(resetPopupControlsState);
   };
 
-  setControlsSwitching = () => {
-    this.#popupControlsComponent.setSwitching();
+  setCommentAddAborting = () => {
+    const resetNewCommentFormState = () => {
+      this.#newCommentFormComponent
+        .updateElement({isDisabled: false});
+    };
+
+    this.#newCommentFormComponent
+      .shake(resetNewCommentFormState);
   };
 
   destroy = () => {
@@ -64,19 +80,17 @@ export default class FilmPopupPresenter {
   };
 
   #renderPopup = () => {
-    this.#filmPopupComponent = new FilmPopupView(this.#film, this.#renderComments, this.#renderControls);
+    this.#filmPopupComponent = new FilmPopupView(this.#film);
 
     document.addEventListener('keydown', this.#handleEscapeKeydown);
 
     this.#filmPopupComponent.setCloseButtonClickHandler(() => {
       this.#closePopup();
     });
-    this.#filmPopupComponent.setFormSubmitHandler((update) => {
-      this.#handleFormSubmit(update);
-    });
 
     this.#renderControls();
     this.#renderComments();
+    this.#renderNewCommentForm();
 
     this.#mainContainer.parentElement.classList.add('hide-overflow');
     this.#mainContainer.parentElement.appendChild(this.#filmPopupComponent.element);
@@ -113,6 +127,19 @@ export default class FilmPopupPresenter {
     );
   };
 
+  #renderNewCommentForm = () => {
+    this.#newCommentFormComponent = new NewCommentView(this.#renderComments, this.#renderControls);
+
+    this.#newCommentFormComponent.setFormSubmitHandler((update) => {
+      this.#handleFormSubmit(update);
+    });
+
+    render(
+      this.#newCommentFormComponent,
+      this.#filmPopupComponent.element
+        .querySelector('.film-details__comments-wrap'));
+  };
+
   #closePopup = () => {
     if(!this.#filmPopupComponent) {
       return;
@@ -128,7 +155,10 @@ export default class FilmPopupPresenter {
     this.#changeData(
       UserAction.ADD_COMMENT,
       UpdateType.MIN,
-      update
+      {
+        userComment: {...update},
+        film: {...this.#film}
+      }
     );
   };
 

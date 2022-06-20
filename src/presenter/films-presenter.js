@@ -187,11 +187,19 @@ export default class FilmsPresenter {
   #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmPopupPresenter.setControlsSwitching();
+        if(this.#filmPopupPresenter.isRendered) {
+          this.#filmPopupPresenter.setControlsSwitching();
+        } else {
+          this.#filmPresenter.get(update.id).setControlsSwitching();
+        }
         try {
           await this.#filmsModel.updateFilm(updateType, update);
         } catch(err) {
-          this.#filmPopupPresenter.setAbortingControlSwitching();
+          if(this.#filmPopupPresenter.isRendered) {
+            this.#filmPopupPresenter.setControlSwitchAborting();
+          } else {
+            this.#filmPresenter.get(update.id).setControlSwitchAborting();
+          }
         }
         break;
       case UserAction.DELETE_COMMENT:
@@ -205,20 +213,22 @@ export default class FilmsPresenter {
             }
           );
         }catch(err) {
-          this.#filmPopupPresenter.setAbortingCommentDeleting(update.commentId);
+          this.#filmPopupPresenter.setCommentDeleteAborting(update.commentId);
         }
         break;
       case UserAction.ADD_COMMENT:
-        await this.#commentsModel.addComment(update.userComment, update.id)
-          .finally(() => {
-            delete update.userComment;
-            this.#filmsModel.updateFilm(
-              updateType,
-              {...update,
-                popupComments: [...this.#commentsModel.comments]
-              }
-            );
-          });
+        this.#filmPopupPresenter.setCommentAdding();
+        try {
+          await this.#commentsModel.addComment(update.userComment, update.film.id);
+          this.#filmsModel.updateFilm(
+            updateType,
+            {...update.film,
+              popupComments: [...this.#commentsModel.comments]
+            }
+          );
+        } catch(err) {
+          this.#filmPopupPresenter.setCommentAddAborting();
+        }
         break;
       case UserAction.CHANGE_SORT:
         this.#sortModel.setSort(updateType, update);
