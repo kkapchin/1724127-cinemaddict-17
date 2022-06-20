@@ -1,9 +1,11 @@
 import { remove, render } from '../framework/render';
 import { UpdateType, UserAction } from '../utils/common';
+import FilmCardControlsView from '../view/film-card-controls-view';
 import FilmCardView from '../view/film-card-view';
 
 export default class FilmPresenter {
   #filmCardComponent = null;
+  #controlsComponent = null;
   #filmContainer = null;
   #film = {};
   #changeData = null;
@@ -32,23 +34,49 @@ export default class FilmPresenter {
     remove(this.#filmCardComponent);
   };
 
+  setControlsSwitching = () => {
+    this.#controlsComponent.setSwitching();
+  };
+
+  setControlSwitchAborting = () => {
+    const resetControlsState = () => {
+      this.#controlsComponent
+        .updateElement({isDisabled: false});
+    };
+
+    this.#filmCardComponent
+      .shake(resetControlsState);
+  };
+
   #renderFilm = () => {
     this.#filmCardComponent = new FilmCardView(this.#film);
 
     this.#filmCardComponent.setFilmCardClickHandler((film) => {
       this.#handleFilmCardClick(film);
     });
-    this.#filmCardComponent.setAddToWatchlistClickHandler(() => {
+
+    this.#renderControls();
+
+    render(this.#filmCardComponent, this.#filmContainer.element);
+  };
+
+  #renderControls = () => {
+    this.#controlsComponent = new FilmCardControlsView(this.#film.userDetails);
+
+    this.#controlsComponent.setAddToWatchlistClickHandler(() => {
       this.#handleAddToWatchlistClick();
     });
-    this.#filmCardComponent.setMarkAsWatchedClickHandler(() => {
+    this.#controlsComponent.setMarkAsWatchedClickHandler(() => {
       this.#handleMarkAsWatchedClick();
     });
-    this.#filmCardComponent.setMarkAsFavoriteClickHandler(() => {
+    this.#controlsComponent.setMarkAsFavoriteClickHandler(() => {
       this.#handleMarkAsFavoriteClick();
     });
 
-    render(this.#filmCardComponent, this.#filmContainer.element);
+    render(
+      this.#controlsComponent,
+      this.#filmCardComponent.element
+    );
   };
 
   #handleFilmCardClick = (film) => {

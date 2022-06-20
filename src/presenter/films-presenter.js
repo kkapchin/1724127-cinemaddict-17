@@ -178,48 +178,57 @@ export default class FilmsPresenter {
         this.#filmPopupPresenter.destroy();
         this.#filmPopupPresenter.init({
           ...film,
-          userComment: {...this.#commentsModel.userComment},
-          comments:[...this.#commentsModel.comments]
+          popupComments:[...this.#commentsModel.comments]
         });
       });
     this.#popupId = film.id;
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_FILM:
-        this.#filmsModel.updateFilm(updateType, update);
-        break;
-      case UserAction.UPDATE_USER_COMMENT:
-        this.#commentsModel.updateUserComment(update.userComment);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...update,
-            userComment: this.#commentsModel.userComment,
-            comments: this.#commentsModel.setFilmId(update.id).comments
+        if(this.#filmPopupPresenter.isRendered) {
+          this.#filmPopupPresenter.setControlsSwitching();
+        } else {
+          this.#filmPresenter.get(update.id).setControlsSwitching();
+        }
+        try {
+          await this.#filmsModel.updateFilm(updateType, update);
+        } catch(err) {
+          if(this.#filmPopupPresenter.isRendered) {
+            this.#filmPopupPresenter.setControlSwitchAborting();
+          } else {
+            this.#filmPresenter.get(update.id).setControlSwitchAborting();
           }
-        );
+        }
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(update);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...{
-            id: update.filmId,
-            userComment: this.#commentsModel.userComment,
-            comments: this.#commentsModel.comments
-          }}
-        );
+        this.#filmPopupPresenter.setCommentDeleting(update.commentId);
+        try {
+          await this.#commentsModel.deleteComment(update.commentId);
+          this.#filmsModel.updateFilm(
+            updateType,
+            {...update.film,
+              popupComments: [...this.#commentsModel.comments]
+            }
+          );
+        }catch(err) {
+          this.#filmPopupPresenter.setCommentDeleteAborting(update.commentId);
+        }
         break;
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.get(update.id).addComment(update.userComment);
-        this.#filmsModel.updateFilm(
-          updateType,
-          {...update,
-            userComment: this.#commentsModel.get(update.id).userComment,
-            comments: this.#commentsModel.get(update.id).comments
-          }
-        );
+        this.#filmPopupPresenter.setCommentAdding();
+        try {
+          await this.#commentsModel.addComment(update.userComment, update.film.id);
+          this.#filmsModel.updateFilm(
+            updateType,
+            {...update.film,
+              popupComments: [...this.#commentsModel.comments]
+            }
+          );
+        } catch(err) {
+          this.#filmPopupPresenter.setCommentAddAborting();
+        }
         break;
       case UserAction.CHANGE_SORT:
         this.#sortModel.setSort(updateType, update);

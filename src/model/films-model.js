@@ -27,14 +27,10 @@ export default class FilmsModel extends Observable {
 
   updateFilm = async (updateType, update) => {
     const index = this.#films.findIndex((film) => film.id === update.id);
+    delete update.popupComments;
 
     if (index === -1) {
       throw new Error('Can\'t update unexisting film');
-    }
-
-    if(update.userComment) {
-      update.comments = [...update.comments.map((comment) => comment.id)];
-      delete update['userComment'];
     }
 
     try {
