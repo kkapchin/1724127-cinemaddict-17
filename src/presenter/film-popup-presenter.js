@@ -128,7 +128,7 @@ export default class FilmPopupPresenter {
   };
 
   #renderNewCommentForm = () => {
-    this.#newCommentFormComponent = new NewCommentView(this.#renderComments, this.#renderControls);
+    this.#newCommentFormComponent = new NewCommentView();
 
     this.#newCommentFormComponent.setFormSubmitHandler((update) => {
       this.#handleFormSubmit(update);

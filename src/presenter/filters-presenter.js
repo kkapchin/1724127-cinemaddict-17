@@ -51,6 +51,6 @@ export default class FiltersPresenter {
       return;
     }
 
-    this.#filtersModel.setFilter(UpdateType.MAX ,filterType);
+    this.#filtersModel.setFilter(UpdateType.MAX, filterType);
   };
 }

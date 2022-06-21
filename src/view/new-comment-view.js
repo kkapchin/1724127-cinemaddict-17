@@ -78,14 +78,10 @@ const createNewCommentTemplate = (userEmotion, userComment, isDisabled) => {
 export default class NewCommentView extends AbstractStatefulView {
   #userEmotion = null;
   #userComment = '';
-  #renderComments = null;
-  #renderControls = null;
 
-  constructor(renderComments, renderControls) {
+  constructor() {
     super();
     this._setState({isDisabled: false});
-    this.#renderComments = renderComments;
-    this.#renderControls = renderControls;
     this.#setInnerHandlers();
   }
 
@@ -133,10 +129,6 @@ export default class NewCommentView extends AbstractStatefulView {
 
     this.#userEmotion = emotion;
     this.updateElement({...this._state});
-
-    //this.#renderComments();
-    //this.#renderControls();
-
     this
       .element
       .querySelector('.film-details__emoji-list')
@@ -149,13 +141,6 @@ export default class NewCommentView extends AbstractStatefulView {
         comment: this.#userComment,
         emotion: this.#userEmotion
       });
-      /* this._callback.formSubmit({
-        ...this._state,
-        userComment: {
-          comment: this.#userComment,
-          emotion: this.#userEmotion
-        }
-      }); */
       document.removeEventListener('keydown', this.#formSubmitHandler);
     }
   };
