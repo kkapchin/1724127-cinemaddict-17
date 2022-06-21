@@ -1,4 +1,5 @@
 import { remove, render } from '../framework/render';
+import { UpdateType } from '../utils/common';
 import UserProfileView from '../view/user-profile-view';
 
 export default class UserPresenter {
@@ -16,7 +17,7 @@ export default class UserPresenter {
 
   init = () => {
     this.#calculateUserLevel();
-    if(this.#userLevel) {
+    if(this.#userLevel !== null) {
       this.#userProfileComponent = new UserProfileView(this.#userLevel);
       render(this.#userProfileComponent, this.#headerContainer);
     }
@@ -44,8 +45,10 @@ export default class UserPresenter {
     }
   };
 
-  #handleModelEvent = () => {
-    remove(this.#userProfileComponent);
+  #handleModelEvent = (updateType) => {
+    if(updateType !== UpdateType.INIT) {
+      remove(this.#userProfileComponent);
+    }
     this.init();
   };
 }
