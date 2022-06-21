@@ -6,9 +6,9 @@ import FiltersModel from './model/filters-model';
 import SortModel from './model/sort-model';
 import FilmsPresenter from './presenter/films-presenter';
 import FiltersPresenter from './presenter/filters-presenter';
+import UserPresenter from './presenter/user-presenter';
 import { render } from './render';
 import FooterStatsView from './view/footer-statistics-view';
-import UserProfileView from './view/user-profile-view';
 
 const AUTHORIZATION = 'Basic hj2SkSt4Ycl1Fa7y';
 const END_POINT = 'https://17.ecmascript.pages.academy/cinemaddict';
@@ -22,6 +22,7 @@ const commentsModel = new CommentsModel(new CommentsApiService(END_POINT, AUTHOR
 const filtersModel = new FiltersModel();
 const sortModel = new SortModel();
 
+const userPresenter = new UserPresenter(header, filmsModel);
 const filtersPresenter = new FiltersPresenter(main, filmsModel, filtersModel);
 const filmsPresenter = new FilmsPresenter(
   main,
@@ -31,9 +32,9 @@ const filmsPresenter = new FilmsPresenter(
   commentsModel
 );
 
-render(new UserProfileView(), header);
 render(new FooterStatsView(), footer);
 
 filmsPresenter.init();
 filtersPresenter.init();
+userPresenter.init();
 filmsModel.init();
