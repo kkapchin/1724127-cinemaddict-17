@@ -1,6 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 
-const createFilmsContainerTemplate = () => '<div class="films-list__container"></div>';
+const createFilmsContainerTemplate = () => '<section class="films"></section>';
 
 export default class FilmsContainerView extends AbstractView {
 

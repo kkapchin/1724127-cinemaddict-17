@@ -4,6 +4,7 @@ import { NoFilms, TitleMessage, UpdateType, UserAction } from '../utils/common';
 import { filterFilms, FilterType } from '../utils/filter';
 import { sortFilmsByDate, sortFilmsByRating, SortType } from '../utils/sort';
 import FilmsContainerView from '../view/films-container-view';
+import FilmsListContainerView from '../view/films-list-container-view';
 import FilmsListView from '../view/films-list-view';
 import FilmPopupPresenter from './film-popup-presenter';
 import FilmPresenter from './film-presenter';
@@ -21,7 +22,9 @@ export default class FilmsPresenter {
   #mainContainer = null;
 
   #filmsContainerComponent = new FilmsContainerView();
+  #filmsListContainerComponent = new FilmsListContainerView();
   #filmsListComponent = null;
+  #topRatedListComponent = null;
 
   #commentsModel = null;
   #filmsModel = null;
@@ -65,13 +68,25 @@ export default class FilmsPresenter {
   init = () => {
     this.#sortPresenter = new SortPresenter(this.#mainContainer, this.#handleViewAction);
     this.#filmPopupPresenter = new FilmPopupPresenter(this.#mainContainer, this.#handleViewAction);
-    this.#renderFilmsList();
+    this.#renderFilms();
+    //this.#renderTopRated();
   };
 
-  #renderFilmsList = () => {
+  #renderTopRated = () => {
+    const topRatedFilms = this.films
+      .filter((film) => parseFloat(film.filmInfo.totalRating) !== 0)
+      .sort(sortFilmsByRating)
+      .slice(0, 2);
+    if(!(topRatedFilms.length === 0)) {
+      this.#topRatedListComponent = new FilmsListView({isEmptyList: true, message: TitleMessage.TOP_RATED});
+      render(this.#topRatedListComponent, this.#mainContainer);
+    }
+  };
+
+  #renderFilms = () => {
     if(this.#isLoading === true) {
       this.#filmsListComponent = new FilmsListView({isLoading: this.#isLoading});
-      render(this.#filmsListComponent, this.#mainContainer);
+      render(this.#filmsListComponent, this.#filmsContainerComponent.element);
       return;
     }
 
@@ -82,22 +97,25 @@ export default class FilmsPresenter {
 
     this.#sortPresenter.init(this.#sortModel.sort);
     this.#filmsListComponent = new FilmsListView();
-    render(this.#filmsListComponent, this.#mainContainer);
+    render(this.#filmsListComponent, this.#filmsContainerComponent.element);
 
-    this.#renderFilms(this.films);
+    this.#renderFilmCards(this.films);
 
-    render(this.#filmsContainerComponent, this.#filmsListComponent.element.lastElementChild);
+    render(this.#filmsListContainerComponent, this.#filmsListComponent.element);
 
     if (this.films.length > this.#renderedFilmsCount) {
       this.#showMoreButtonPresenter = new ShowMoreButtonPresenter(
-        this.#filmsListComponent.element.lastElementChild,
+        this.#filmsListComponent.element,
         this.#handleShowMoreButtonClick
       );
       this.#showMoreButtonPresenter.init();
     }
+
+    //this.#renderTopRated();
+    render(this.#filmsContainerComponent, this.#mainContainer);
   };
 
-  #renderFilms = (films) => {
+  #renderFilmCards = (films) => {
     const filmsCount = this.films.length;
     films
       .slice(0, Math.min(filmsCount, this.#renderedFilmsCount))
@@ -108,7 +126,7 @@ export default class FilmsPresenter {
 
   #renderFilm = (film) => {
     const filmPresenter = new FilmPresenter(
-      this.#filmsContainerComponent,
+      this.#filmsListContainerComponent,
       this.#handleViewAction,
     );
 
@@ -164,7 +182,7 @@ export default class FilmsPresenter {
     const newRenderedFilmsCount = Math.min(filmsCount, this.#renderedFilmsCount + FILMS_COUNT_PER_STEP);
     const films = this.films.slice(this.#renderedFilmsCount, newRenderedFilmsCount);
 
-    this.#renderFilms(films);
+    this.#renderFilmCards(films);
     this.#renderedFilmsCount = newRenderedFilmsCount;
 
     if (this.#renderedFilmsCount >= filmsCount) {
@@ -240,23 +258,23 @@ export default class FilmsPresenter {
     switch (updateType) {
       case UpdateType.MIN:
         this.#clearFilmsList();
-        this.#renderFilmsList();
+        this.#renderFilms();
         if(this.#popupId === data.id) {
           this.#updatePopupView(data);
         }
         break;
       case UpdateType.MID:
         this.#clearFilmsList({resetRenderedFilmsCount: true});
-        this.#renderFilmsList();
+        this.#renderFilms();
         break;
       case UpdateType.MAX:
         this.#clearFilmsList({resetRenderedFilmsCount: true, resetSortType: true});
-        this.#renderFilmsList();
+        this.#renderFilms();
         break;
       case UpdateType.INIT:
         this.#isLoading = false;
         this.#clearFilmsList();
-        this.#renderFilmsList();
+        this.#renderFilms();
         break;
     }
   };

@@ -1,18 +1,12 @@
 import AbstractView from '../framework/view/abstract-view';
 import { NoFilms, TitleMessage } from '../utils/common';
 
-const createFilmsListTemplate = (isEmptyList, titleMessage, isLoading) => (`<section class="films">
-    <section class="films-list">
+const createFilmsListTemplate = (isEmptyList, titleMessage, isLoading) => (`<section class="films-list">
   ${isLoading ?
     `<h2 class="films-list__title">${TitleMessage.LOADING}</h2>` :
     `<h2 class="films-list__title ${isEmptyList ? '' : 'visually-hidden'}">${titleMessage}</h2>`
   }
-    </section>
-
-    <!-- extra 'Top rated' -->
-    <!-- extra 'Most commented' -->
-
-  </section>`
+    </section>`
 );
 
 export default class FilmsListView extends AbstractView {

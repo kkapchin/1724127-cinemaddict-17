@@ -27,6 +27,8 @@ export const TitleMessage = {
   [FilterType.HISTORY]: 'There are no watched movies now',
   [FilterType.FAVORITES]: 'There are no favorite movies now',
   LOADING: 'Loading...',
+  TOP_RATED: 'Top rated',
+  MOST_COMMENTED: 'Most commented',
 };
 
 export const NoFilms = {

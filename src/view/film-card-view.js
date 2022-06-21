@@ -4,7 +4,6 @@ import { getDuration } from '../utils/common';
 
 const createFilmCardTemplate = (film) => {
   const { title, totalRating, genre, description, poster } = film.filmInfo;
-  //const { watchlist, alreadyWatched, favorite } = film.userDetails;
   const comments = film.comments;
   const releaseYear = dayjs(film.filmInfo.release.date).format('YYYY');
   const duration = getDuration(film.filmInfo.runtime);
