@@ -1,5 +1,4 @@
-import { remove } from '../framework/render';
-import { render } from '../render';
+import { remove, render } from '../framework/render';
 import { NoFilms, TitleMessage, UpdateType, UserAction } from '../utils/common';
 import { filterFilms, FilterType } from '../utils/filter';
 import { sortFilmsByCommentsQuantity, sortFilmsByDate, sortFilmsByRating, SortType } from '../utils/sort';
