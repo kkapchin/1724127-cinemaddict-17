@@ -1,13 +1,6 @@
 import dayjs from 'dayjs';
 import { FilterType } from './filter';
 
-export const getRandomInteger = (a, b) => {
-  const lower = Math.ceil(Math.min(Math.abs(a), Math.abs(b)));
-  const upper = Math.floor(Math.max(Math.abs(a), Math.abs(b)));
-  const result = Math.random() * (upper - lower + 1) + lower;
-  return Math.floor(result);
-};
-
 export const getDuration = (minutes) => {
   const duration = dayjs().hour(0).minute(minutes);
   if(minutes > 59) {
@@ -27,6 +20,8 @@ export const TitleMessage = {
   [FilterType.HISTORY]: 'There are no watched movies now',
   [FilterType.FAVORITES]: 'There are no favorite movies now',
   LOADING: 'Loading...',
+  TOP_RATED: 'Top rated',
+  MOST_COMMENTED: 'Most commented',
 };
 
 export const NoFilms = {
@@ -38,20 +33,6 @@ export const MarkButton = {
   WATCHLIST: 'Add to watchlist',
   WATCHED: 'Mark as watched',
   FAVORITE: 'Mark as favorite',
-};
-
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1),
-  ];
 };
 
 export const CommentEmotion = {
