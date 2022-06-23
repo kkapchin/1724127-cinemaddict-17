@@ -39,6 +39,11 @@ export default class FilmPopupPresenter {
     this.#popupControlsComponent.setSwitching();
   };
 
+  setControlsEnabled = () => {
+    this.#popupControlsComponent
+      .updateElement({isDisabled: false});
+  };
+
   setCommentAdding = () => {
     this.#newCommentFormComponent.setSubmitting();
   };
@@ -56,13 +61,8 @@ export default class FilmPopupPresenter {
   };
 
   setControlSwitchAborting = () => {
-    const resetPopupControlsState = () => {
-      this.#popupControlsComponent
-        .updateElement({isDisabled: false});
-    };
-
     this.#popupControlsComponent
-      .shake(resetPopupControlsState);
+      .shake(this.setControlsEnabled);
   };
 
   setCommentAddAborting = () => {

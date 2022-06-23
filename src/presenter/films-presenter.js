@@ -255,32 +255,30 @@ export default class FilmsPresenter {
       case UserAction.UPDATE_FILM:
         if(this.#filmPopupPresenter.isRendered) {
           this.#filmPopupPresenter.setControlsSwitching();
-        } else {
-          if(this.#filmPresenter.has(update.id)) {
-            this.#filmPresenter.get(update.id).setControlsSwitching();
-          }
-          if(this.#topRatedPresenter.has(update.id)) {
-            this.#topRatedPresenter.get(update.id).setControlsSwitching();
-          }
-          if(this.#mostCommentedPresenter.has(update.id)) {
-            this.#mostCommentedPresenter.get(update.id).setControlsSwitching();
-          }
+        }
+        if(this.#filmPresenter.has(update.id)) {
+          this.#filmPresenter.get(update.id).setControlsSwitching();
+        }
+        if(this.#topRatedPresenter.has(update.id)) {
+          this.#topRatedPresenter.get(update.id).setControlsSwitching();
+        }
+        if(this.#mostCommentedPresenter.has(update.id)) {
+          this.#mostCommentedPresenter.get(update.id).setControlsSwitching();
         }
         try {
           await this.#filmsModel.updateFilm(updateType, update);
         } catch(err) {
           if(this.#filmPopupPresenter.isRendered) {
             this.#filmPopupPresenter.setControlSwitchAborting();
-          } else {
-            if(this.#filmPresenter.has(update.id)) {
-              this.#filmPresenter.get(update.id).setControlSwitchAborting();
-            }
-            if(this.#topRatedPresenter.has(update.id)) {
-              this.#topRatedPresenter.get(update.id).setControlSwitchAborting();
-            }
-            if(this.#mostCommentedPresenter.has(update.id)) {
-              this.#mostCommentedPresenter.get(update.id).setControlSwitchAborting();
-            }
+          }
+          if(this.#filmPresenter.has(update.id)) {
+            this.#filmPresenter.get(update.id).setControlSwitchAborting();
+          }
+          if(this.#topRatedPresenter.has(update.id)) {
+            this.#topRatedPresenter.get(update.id).setControlSwitchAborting();
+          }
+          if(this.#mostCommentedPresenter.has(update.id)) {
+            this.#mostCommentedPresenter.get(update.id).setControlSwitchAborting();
           }
         }
         break;
@@ -323,6 +321,9 @@ export default class FilmsPresenter {
       case UpdateType.MIN:
         this.#clearFilms();
         this.#renderFilms();
+        if(this.#filmPopupPresenter.isRendered) {
+          this.#filmPopupPresenter.setControlsEnabled();
+        }
         if(this.#popupId === data.id) {
           this.#updatePopupView(data);
         }
