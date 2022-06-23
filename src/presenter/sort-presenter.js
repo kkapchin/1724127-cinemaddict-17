@@ -19,11 +19,6 @@ export default class SortPresenter {
     this.#renderSort();
   };
 
-  update(sortType) {
-    this.#sortType = sortType;
-    this.#sortComponent.updateElement({sortType});
-  }
-
   destroy = () => {
     remove(this.#sortComponent);
   };

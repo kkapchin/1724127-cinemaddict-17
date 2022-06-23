@@ -67,6 +67,7 @@ export default class FilmsPresenter {
       case SortType.RATING:
         return [...filteredFilms].sort(sortFilmsByRating);
     }
+
     return filteredFilms;
   }
 

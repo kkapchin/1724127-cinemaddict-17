@@ -21,11 +21,6 @@ export default class FilmPresenter {
     this.#renderFilm();
   }
 
-  update(updatedFilm) {
-    this.#film = {...this.#film,...updatedFilm};
-    this.#filmCardComponent.updateElement(this.#film);
-  }
-
   setFilmCardClickHandler = (callback) => {
     this._callback.filmCardClick = callback;
   };
